@@ -17,6 +17,7 @@ final class ThumbnailCache: @unchecked Sendable {
     private var waiting: [String: [CheckedContinuation<NSImage?, Never>]] = [:]
     /// Files ImageIO couldn't draw. Not retried.
     private var failed = Set<String>()
+    private var closed = false
 
     init(reader: BlockReader) {
         self.reader = reader
@@ -32,7 +33,7 @@ final class ThumbnailCache: @unchecked Sendable {
         if let hit = cached(file) { return hit }
         return await withCheckedContinuation { continuation in
             lock.lock()
-            if failed.contains(file.id) {
+            if closed || failed.contains(file.id) {
                 lock.unlock()
                 continuation.resume(returning: nil)
                 return
@@ -44,17 +45,14 @@ final class ThumbnailCache: @unchecked Sendable {
             }
             waiting[file.id] = [continuation]
             lock.unlock()
-            queue.addOperation { [weak self] in
-                guard let self else {
-                    continuation.resume(returning: nil)
-                    return
-                }
-                let image = Self.render(file, reader: self.reader)
+            // Holds the cache strongly for the length of one render; every waiter is resumed on every path.
+            queue.addOperation {
+                let image = self.isClosed ? nil : Self.render(file, reader: self.reader)
                 if let image {
                     self.cache.setObject(image, forKey: file.id as NSString)
                 }
                 self.lock.lock()
-                if image == nil { self.failed.insert(file.id) }
+                if image == nil && !self.closed { self.failed.insert(file.id) }
                 let continuations = self.waiting.removeValue(forKey: file.id) ?? []
                 self.lock.unlock()
                 for waiter in continuations { waiter.resume(returning: image) }
@@ -62,9 +60,21 @@ final class ThumbnailCache: @unchecked Sendable {
         }
     }
 
+    /// Stops drawing and answers everything still waiting, so no tile's task is left suspended.
     func clear() {
-        queue.cancelAllOperations()
+        lock.lock()
+        closed = true
+        let pending = waiting.values.flatMap { $0 }
+        waiting.removeAll()
+        lock.unlock()
+        for waiter in pending { waiter.resume(returning: nil) }
         cache.removeAllObjects()
+    }
+
+    private var isClosed: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return closed
     }
 
     static func isPlayableVideo(_ file: RecoverableFile) -> Bool {

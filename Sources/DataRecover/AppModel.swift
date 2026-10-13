@@ -105,9 +105,6 @@ final class AppModel {
         panel.allowedContentTypes = [UTType(filenameExtension: "img") ?? .diskImage]
         panel.canCreateDirectories = true
         guard panel.runModal() == .OK, let url = panel.url else { return }
-        if FileManager.default.fileExists(atPath: url.path) {
-            try? FileManager.default.removeItem(at: url)
-        }
         opening = device.id
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             if DeviceCatalog.destination(url, isOn: device) {
@@ -118,8 +115,10 @@ final class AppModel {
                 return
             }
             let parent = url.deletingLastPathComponent()
+            // The file being replaced frees its space once it goes.
+            let replaced = ((try? FileManager.default.attributesOfItem(atPath: url.path))?[.size] as? NSNumber)?.uint64Value ?? 0
             let free = (try? parent.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]))?
-                .volumeAvailableCapacityForImportantUsage.map { UInt64(max($0, 0)) }
+                .volumeAvailableCapacityForImportantUsage.map { UInt64(max($0, 0)) + replaced }
             if let free, free < device.size + 100 * 1024 * 1024 {
                 DispatchQueue.main.async {
                     self?.opening = nil
@@ -132,6 +131,10 @@ final class AppModel {
             }
             do {
                 let reader = try DiskAccess.open(device)
+                // Only now, with every check passed and the disk open, replace the file the person chose to overwrite.
+                if FileManager.default.fileExists(atPath: url.path) {
+                    try FileManager.default.removeItem(at: url)
+                }
                 let unmounted = MountKeeper.unmountForReading(device)
                 DispatchQueue.main.async {
                     guard let self else { return }
@@ -202,7 +205,8 @@ final class AppModel {
     }
 
     func eject(_ device: Device) {
-        session?.close()
+        // No remount: it would race the eject and could make it fail.
+        session?.close(remount: .never)
         session = nil
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             let ok = DeviceCatalog.eject(device)
@@ -215,7 +219,8 @@ final class AppModel {
         }
     }
 
+    /// Remounts before returning: background work would be cut off by the app quitting.
     func prepareToQuit() {
-        session?.close()
+        session?.close(remount: .now)
     }
 }

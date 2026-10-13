@@ -1,0 +1,109 @@
+<!--
+title: {{APP}} FAQ: Safety, Privacy and How Mac Recovery Works
+description: Answers about {{APP}}: is it safe, why it asks for your password, what it can recover, how long scans take, and what Partial and Damaged mean.
+h1: Frequently asked questions
+keywords: {{APP}} FAQ; Mac photo recovery questions; is photo recovery software safe; SD card recovery Mac FAQ
+updated: 2026-10-13
+-->
+
+<p>{{APP}} is a free Mac app that recovers deleted photos, videos and files from memory cards, USB sticks and external drives. It only reads the disk, it has no limits, and it never connects to the internet. Below are straight answers to the questions people ask most.</p>
+
+<a class="download" href="/download">Download {{APP}} free</a>
+
+<section class="faq">
+  <h2>Safety and privacy</h2>
+  <details>
+    <summary>Is {{APP}} really free?</summary>
+    <p>Yes. There's no trial, no limit on files or data, no account and no email sign-up. After a successful recovery, it offers you the option to leave a tip. That's the only time it asks. <a href="/why-free">Here's why it's free.</a></p>
+  </details>
+  <details>
+    <summary>Can {{APP}} damage my card or make things worse?</summary>
+    <p>No. macOS opens the card or drive read-only for {{APP}}, so it can't change anything on it. While scanning, {{APP}} also unmounts the disk so macOS can't write search indexes or other hidden files to it. And it won't let you save recovered files back onto the disk you're recovering from, which would overwrite the files you're trying to rescue.</p>
+  </details>
+  <details>
+    <summary>Why does it ask for my Mac's password?</summary>
+    <p>macOS only lets an app read a disk directly, sector by sector, with an administrator's permission. The password box is macOS's own. Once you enter it, macOS opens that one disk read-only for {{APP}}. You're asked once per scan.</p>
+  </details>
+  <details>
+    <summary>Why does macOS ask me to allow Full Disk Access?</summary>
+    <p>macOS privacy protections can block apps from reading memory cards and drives until you allow it. If that happens, {{APP}} shows you what to do. Open System Settings › Privacy &amp; Security › Full Disk Access, turn on {{APP}} (if it isn't listed, click + and choose it in Applications), then come back and click the disk again. You only need to do this once, and {{APP}} still only reads the disk.</p>
+  </details>
+  <details>
+    <summary>Does {{APP}} collect any data or connect to the internet?</summary>
+    <p>No. There's no tracking, no analytics and no account, and the app never connects to the internet. Your files are read on your Mac and saved to a folder you choose on your Mac or another drive.</p>
+  </details>
+  <details>
+    <summary>Who makes {{APP}}?</summary>
+    <p>weio Ltd, a small company in the UK.</p>
+  </details>
+</section>
+
+<section class="faq">
+  <h2>Download and compatibility</h2>
+  <details>
+    <summary>Which Macs does it run on?</summary>
+    <p>Any Mac running macOS 14 Sonoma or later, with Apple silicon or an Intel processor.</p>
+  </details>
+  <details>
+    <summary>Why isn't {{APP}} on the Mac App Store?</summary>
+    <p>Apps from the Mac App Store aren't allowed to read a memory card directly, and that's exactly what recovery needs. So {{APP}} is available from {{DOMAIN}} and through Homebrew instead.</p>
+  </details>
+  <details>
+    <summary>Is the download safe, and will macOS let me open it?</summary>
+    <p>Yes. {{APP}} is signed and notarized by Apple, so macOS checks it and opens it like any other app. The first time, macOS may ask you to confirm that you want to open an app downloaded from the internet. Download it from {{DOMAIN}}, or install it with Homebrew using the command on the <a href="/download">download page</a>.</p>
+  </details>
+</section>
+
+<section class="faq">
+  <h2>What it can recover</h2>
+  <details>
+    <summary>What can {{APP}} scan?</summary>
+    <p>SD and microSD cards, CompactFlash and CFexpress cards (in a card reader), USB flash drives, and external hard drives and SSDs. It doesn't scan your Mac's internal drive.</p>
+  </details>
+  <details>
+    <summary>Why won't it scan my Mac's own drive?</summary>
+    <p>A Mac's internal SSD erases deleted data automatically using a command called TRIM, and it's always encrypted, so there's nothing a scan can reliably bring back. Check the Trash, Photos › Recently Deleted (30 days), iCloud Drive's Recently Deleted on iCloud.com (30 days), Time Machine and the app's version history instead. Our guide to <a href="/recover-deleted-files-mac-ssd">files deleted from a Mac</a> has the steps.</p>
+  </details>
+  <details>
+    <summary>Can it recover photos deleted from my iPhone?</summary>
+    <p>No. A phone connected to a Mac can't be scanned. On the iPhone, open Photos, scroll down to Utilities and tap Recently Deleted, where photos are kept for 30 days. If you use iCloud Photos, you can also recover them at iCloud.com. For an Android phone with a microSD card used as portable storage, take the card out and scan it with a card reader. A card the phone set up as internal storage is encrypted and can't be scanned.</p>
+  </details>
+  <details>
+    <summary>My camera is plugged in, but {{APP}} doesn't see it. Why?</summary>
+    <p>Most cameras connected by USB cable appear only in Photos or Image Capture, not as a disk. Take the card out of the camera and put it in your Mac's SD slot or a card reader.</p>
+  </details>
+  <details>
+    <summary>Which file types can it find?</summary>
+    <p>On FAT32 and exFAT disks, deleted files of any type can come back with their names through the file records. The deep scan, which finds files by their contents, recognizes JPEG, HEIC, PNG, GIF, TIFF, WebP, BMP and PSD; RAW files from Canon (CR2, CR3), Nikon (NEF), Sony (ARW), Fujifilm (RAF), Olympus and OM System (ORF), Panasonic (RW2), Pentax (PEF) and Samsung (SRW), plus Adobe DNG; MOV, MP4, M4V, 3GP, AVI, MKV and WebM video; MP3, WAV, M4A and FLAC audio; PDF, Word, Excel, PowerPoint (old and new formats), Pages, Numbers, Keynote, EPUB and ZIP.</p>
+  </details>
+</section>
+
+<section class="faq">
+  <h2>Scanning and results</h2>
+  <details>
+    <summary>How long does a scan take?</summary>
+    <p>Reading the file records is very fast. The deep scan reads the whole disk, so it depends on size and connection. As a rule of thumb, allow 1 to 3 minutes per 10 GB with a USB 3 card reader, and longer with USB 2. A 64 GB card typically takes 6 to 20 minutes, and a 1 TB drive can take several hours.</p>
+  </details>
+  <details>
+    <summary>Can I recover files before the scan finishes?</summary>
+    <p>Yes. Files appear as they're found, and you can recover them at any time. You can also stop the scan and still recover everything found so far.</p>
+  </details>
+  <details>
+    <summary>Why did my card disappear from Finder during the scan?</summary>
+    <p>{{APP}} unmounts the card while scanning so macOS can't write to it. That's expected. It isn't a sign that anything has gone wrong.</p>
+  </details>
+  <details>
+    <summary>Why do some files have their original names and others are named by date?</summary>
+    <p>Files found through the disk's file records keep their names, folders and dates. Files found by the deep scan, for example after a format, have no record left, so photos are named by the date and time they were taken, like 2024-06-01 14.30.00.jpg, along with the camera model.</p>
+  </details>
+  <details>
+    <summary>What do Partial and Damaged mean?</summary>
+    <p>Partial means part of the file couldn't be traced, so it may open with missing sections. Damaged means the start of the file has been overwritten, so it probably won't open. If the disk has unreadable sectors, {{APP}} fills those parts with blanks and lists the affected files in a note saved with your recovered files.</p>
+  </details>
+  <details>
+    <summary>{{APP}} didn't find my files. Why?</summary>
+    <p>The most common reason is that new photos or files were saved over them. A full or low-level format in the camera also wipes the card completely. External SSDs formatted as APFS or Mac OS Extended are usually trimmed, which erases deleted data. Encrypted drives can't be scanned. And long videos on big cards are sometimes stored in pieces that can't all be traced. If the files were ever copied elsewhere, a phone, Photos on your Mac or iCloud may still have them.</p>
+  </details>
+</section>
+
+<a class="download" href="/download">Download {{APP}} free</a>

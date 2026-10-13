@@ -82,7 +82,9 @@ final class RecoverySession: Identifiable {
 
     var isScanning: Bool { state == .scanning }
 
-    var visibleFiles: [RecoverableFile] { sections.flatMap(\.files) }
+    /// Everything the filters let through, in grid order. Rebuilt with `sections`.
+    private(set) var visibleFiles: [RecoverableFile] = []
+    private(set) var visibleBytes: UInt64 = 0
 
     var selectedFiles: [RecoverableFile] {
         files.filter { selection.contains($0.id) }
@@ -197,6 +199,9 @@ final class RecoverySession: Identifiable {
             list.sort { $0.size > $1.size }
             sections = list.isEmpty ? [] : [Section(id: "all", title: "", files: list)]
         }
+        // In display order, so stepping through previews follows the grid.
+        visibleFiles = sections.flatMap(\.files)
+        visibleBytes = visibleFiles.reduce(0) { $0 + $1.size }
     }
 
     private static let dayFormatter: DateFormatter = {
@@ -261,14 +266,28 @@ final class RecoverySession: Identifiable {
 
     // MARK: Clean-up
 
-    /// Gives the disk back to macOS. Called when the person leaves this disk or quits.
-    func close() {
+    enum Remount {
+        /// In the background, when the person moves on to another disk.
+        case later
+        /// Before returning, when the app is about to quit and background work would be cut off.
+        case now
+        /// Not at all, because the disk is about to be ejected.
+        case never
+    }
+
+    /// Gives the disk back to macOS. Called when the person leaves this disk, ejects it or quits.
+    func close(remount: Remount = .later) {
         stopFlag.set()
         thumbnails.clear()
-        if unmountedForScan, let device {
-            DispatchQueue.global(qos: .utility).async {
-                MountKeeper.remount(device)
-            }
+        QuickLookExport.cleanUp()
+        guard unmountedForScan, let device else { return }
+        switch remount {
+        case .later:
+            DispatchQueue.global(qos: .utility).async { MountKeeper.remount(device) }
+        case .now:
+            MountKeeper.remount(device)
+        case .never:
+            MountKeeper.forget(device)
         }
     }
 }

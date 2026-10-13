@@ -46,9 +46,16 @@ struct PreviewSheet: View {
         .frame(width: 900, height: 680)
         .task(id: file.id) { await load() }
         .onDisappear { player?.pause() }
+        // Key presses only reach a focused view, so the sheet takes focus when it opens.
+        .focusable()
+        .focused($focused)
+        .focusEffectDisabled()
+        .onAppear { focused = true }
         .onKeyPress(.leftArrow) { step(-1); return .handled }
         .onKeyPress(.rightArrow) { step(1); return .handled }
     }
+
+    @FocusState private var focused: Bool
 
     private var details: some View {
         HStack(alignment: .center, spacing: 16) {

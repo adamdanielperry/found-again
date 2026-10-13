@@ -154,11 +154,18 @@ struct SessionView: View {
     }
 }
 
-/// Copies one file to a private temporary folder so Quick Look can show it.
+/// Copies one file to a private temporary folder so Quick Look can show it. Emptied when the disk is closed.
 enum QuickLookExport {
+    private static var root: URL {
+        FileManager.default.temporaryDirectory.appendingPathComponent("Preview", isDirectory: true)
+    }
+
+    static func cleanUp() {
+        try? FileManager.default.removeItem(at: root)
+    }
+
     static func export(_ file: RecoverableFile, reader: BlockReader) -> URL? {
-        let base = FileManager.default.temporaryDirectory.appendingPathComponent("Preview", isDirectory: true)
-            .appendingPathComponent(file.id.replacingOccurrences(of: "/", with: "-"), isDirectory: true)
+        let base = root.appendingPathComponent(file.id.replacingOccurrences(of: "/", with: "-"), isDirectory: true)
         try? FileManager.default.removeItem(at: base)
         var flat = file
         flat.originalPath = file.name
@@ -338,7 +345,7 @@ struct RecoverBar: View {
             .tint(Brand.accent)
             .controlSize(.large)
             .keyboardShortcut("r", modifiers: .command)
-            .disabled(session.recoverTargets.isEmpty)
+            .disabled(targetCount == 0)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
@@ -346,14 +353,17 @@ struct RecoverBar: View {
         .overlay(alignment: .top) { Divider() }
     }
 
-    private var targets: [RecoverableFile] { session.recoverTargets }
+    /// Counted from cached totals, because this bar redraws with every progress update.
+    private var targetCount: Int {
+        session.selection.isEmpty ? session.visibleCount : session.selection.count
+    }
 
     private var summary: String {
-        let size = ByteText.string(targets.reduce(0) { $0 + $1.size })
         if session.selection.isEmpty {
-            return "\(session.visibleCount.formatted()) showing · \(size)"
+            return "\(session.visibleCount.formatted()) showing · \(ByteText.string(session.visibleBytes))"
         }
-        return "\(session.selection.count.formatted()) selected · \(size)"
+        let bytes = session.selectedFiles.reduce(UInt64(0)) { $0 + $1.size }
+        return "\(session.selection.count.formatted()) selected · \(ByteText.string(bytes))"
     }
 
     private var hint: String {
@@ -363,7 +373,7 @@ struct RecoverBar: View {
     }
 
     private var buttonTitle: String {
-        let count = targets.count
+        let count = targetCount
         if session.selection.isEmpty {
             return count == 1 ? "Recover 1 File…" : "Recover All \(count.formatted())…"
         }

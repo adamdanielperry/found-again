@@ -31,7 +31,7 @@ updated: 2026-10-13
     <tr><td><a href="#om-system">OM System / Olympus</a></td><td>DCIM/100OMSYS or DCIM/100OLYMP</td><td>P6010001.JPG</td><td>ORF</td></tr>
     <tr><td><a href="#gopro">GoPro</a></td><td>DCIM/100GOPRO</td><td>GOPR0001.JPG, GX010001.MP4</td><td>GPR</td></tr>
     <tr><td><a href="#dji">DJI drones</a></td><td>DCIM/100MEDIA on many models</td><td>DJI_0001.JPG, DJI_0001.MP4</td><td>DNG</td></tr>
-    <tr><td><a href="#insta360">Insta360</a></td><td>DCIM/Camera01</td><td>VID_…​.insv, IMG_…​.insp</td><td>Varies by model</td></tr>
+    <tr><td><a href="#insta360">Insta360</a></td><td>DCIM/Camera01</td><td>VID_20240601_143000_00_001.insv</td><td>Not covered here</td></tr>
   </tbody>
 </table>
 
@@ -55,7 +55,7 @@ updated: 2026-10-13
   <li><strong>Video:</strong> DSC_0001.MOV or .MP4. N-RAW clips (.NEV) on the Z8 and Z9 can come back by name if the file records survive, but the deep scan doesn't look for them.</li>
 </ul>
 
-<p><strong>Formatting:</strong> Nikon doesn't document whether its format erases photo data. If you formatted by mistake, stop shooting and scan the card. A quick look will tell you.</p>
+<p><strong>Formatting:</strong> we haven't been able to confirm what Nikon's format does to photo data. If you formatted by mistake, stop shooting and scan the card. The results will show whether photos are still there.</p>
 
 <h2 id="sony">Sony</h2>
 
@@ -78,7 +78,7 @@ updated: 2026-10-13
 
 <p>Photos deleted in the camera usually come back with their names, for example DCIM/100_FUJI/DSCF0001.JPG. Fujifilm cards are where {{APP}} began (<a href="/why-free">here's the story</a>).</p>
 
-<p><strong>Formatting:</strong> Fujifilm doesn't document what its format does to the data. Scan the card before reusing it.</p>
+<p><strong>Formatting:</strong> we haven't been able to confirm what Fujifilm's format does to photo data. If you formatted by mistake, scan the card before reusing it.</p>
 
 <h2 id="panasonic">Panasonic Lumix</h2>
 
@@ -89,18 +89,18 @@ updated: 2026-10-13
   <li><strong>Video:</strong> newer models save MP4 or MOV files alongside the photos. Older models that record AVCHD keep .MTS files under PRIVATE/AVCHD, which can come back by name but aren't on the deep scan's list.</li>
 </ul>
 
-<p><strong>Formatting:</strong> on the GH6 and GH7, the Card Format screen offers "Low Level Format" for CFexpress cards. That's the deeper option. The standard format on other models doesn't have a low-level checkbox.</p>
+<p><strong>Formatting:</strong> on the GH6 and GH7, the Card Format screen offers "Low Level Format" for CFexpress cards. That's the deeper option. Panasonic's instructions for other models, such as the G9, GH5 and G100, list a plain Format option.</p>
 
 <h2 id="om-system">OM System and Olympus</h2>
 
 <ul>
   <li><strong>Folders:</strong> DCIM/100OMSYS on OM System cameras, DCIM/100OLYMP on Olympus-branded ones.</li>
-  <li><strong>Photos:</strong> the name includes the date. P6010001.JPG means June 1st, picture 0001. The second character is the month (1 to 9, then A, B and C for October to December), the next two are the day.</li>
+  <li><strong>Photos:</strong> the name includes the date. P6010001.JPG means June 1, picture 0001. The second character is the month (1 to 9, then A, B and C for October to December), the next two are the day.</li>
   <li><strong>RAW:</strong> ORF, which the deep scan finds.</li>
   <li><strong>Video:</strong> MOV files with the same naming.</li>
 </ul>
 
-<p>The date in the name is handy when you're sorting recovered files by hand. If the deep scan named a photo by its date, you can rebuild the camera's name from it.</p>
+<p>The date in the name is handy when you're sorting recovered files by hand, since it tells you roughly when each photo was taken.</p>
 
 <h2 id="gopro">GoPro</h2>
 
@@ -128,11 +128,11 @@ updated: 2026-10-13
 
 <ul>
   <li><strong>Folders:</strong> DCIM/Camera01.</li>
-  <li><strong>Names:</strong> VID_20240601_143000_00_001.insv for video and IMG_…​.insp for photos, with the date and time built in. Low-resolution .LRV copies sit alongside.</li>
+  <li><strong>Names:</strong> VID_20240601_143000_00_001.insv for video and IMG_20240601_143000_00_001.insp for photos, with the date and time built in. Low-resolution .LRV copies sit alongside.</li>
   <li><strong>Lenses:</strong> the X3 writes two video files per recording, one per lens. The X4 and later write one file with both.</li>
 </ul>
 
-<p><strong>What to expect:</strong> deleted .insv and .insp files can come back with their names when the card's file records survive, and Insta360 Studio needs those original names and extensions. The deep scan doesn't recognize Insta360's own formats, so after a format we can't promise much for 360 footage. Recover as soon as you can, before the card is used again.</p>
+<p><strong>What to expect:</strong> deleted .insv and .insp files can come back with their names when the card's file records survive. That matters, because Insta360 Studio expects its own .insv and .insp files. The deep scan doesn't recognize Insta360's own formats, so after a format we can't promise much for 360 footage. Recover as soon as you can, before the card is used again.</p>
 
 <h2>Tips for recovering video</h2>
 

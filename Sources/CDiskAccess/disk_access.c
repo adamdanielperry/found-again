@@ -106,19 +106,25 @@ DiskAccessResult disk_access_open_readonly(const char *path, const char *prompt,
         return DiskAccessFailed;
     }
 
+    // Writing the authorization to a pipe authopen has already closed must fail, not kill the app.
+    fcntl(input[1], F_SETNOSIGPIPE, 1);
+
+    // Only the three descriptors set up below reach authopen; none of the app's other open files do.
+    posix_spawnattr_t attributes;
+    posix_spawnattr_init(&attributes);
+    posix_spawnattr_setflags(&attributes, POSIX_SPAWN_CLOEXEC_DEFAULT);
+
     posix_spawn_file_actions_t actions;
     posix_spawn_file_actions_init(&actions);
     posix_spawn_file_actions_adddup2(&actions, input[0], STDIN_FILENO);
     posix_spawn_file_actions_adddup2(&actions, sockets[1], STDOUT_FILENO);
     posix_spawn_file_actions_adddup2(&actions, errors[1], STDERR_FILENO);
-    posix_spawn_file_actions_addclose(&actions, input[1]);
-    posix_spawn_file_actions_addclose(&actions, sockets[0]);
-    posix_spawn_file_actions_addclose(&actions, errors[0]);
 
     char *arguments[] = { "/usr/libexec/authopen", "-stdoutpipe", "-extauth", (char *)path, NULL };
     pid_t child = 0;
-    int spawned = posix_spawn(&child, arguments[0], &actions, NULL, arguments, environ);
+    int spawned = posix_spawn(&child, arguments[0], &actions, &attributes, arguments, environ);
     posix_spawn_file_actions_destroy(&actions);
+    posix_spawnattr_destroy(&attributes);
     close(input[0]);
     close(sockets[1]);
     close(errors[1]);
@@ -131,8 +137,6 @@ DiskAccessResult disk_access_open_readonly(const char *path, const char *prompt,
         return DiskAccessFailed;
     }
 
-    // authopen exits on a closed pipe instead of us receiving SIGPIPE.
-    signal(SIGPIPE, SIG_IGN);
     ssize_t written = write(input[1], &external, sizeof(external));
     close(input[1]);
 
