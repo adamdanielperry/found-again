@@ -1,11 +1,12 @@
 import Foundation
 
-public enum RecoverError: Error, LocalizedError {
+public enum RecoverError: Error, LocalizedError, Equatable {
     case readFailed(String)
     case unsafeDevice(String)
-    case destinationOnCard
+    case destinationOnSource
     case notEnoughSpace(needed: UInt64, available: UInt64)
-    case needsDiskAccess
+    case accessDenied
+    case deviceGone
     case cancelled
     case message(String)
 
@@ -15,14 +16,16 @@ public enum RecoverError: Error, LocalizedError {
             return detail
         case .unsafeDevice(let detail):
             return detail
-        case .destinationOnCard:
-            return "Choose a folder on this Mac. Recovered photos can't be saved onto the same card."
+        case .destinationOnSource:
+            return "Choose a folder on another disk. Saving onto the disk you're recovering from could overwrite the files you want back."
         case .notEnoughSpace(let needed, let available):
-            return "The folder you chose doesn't have enough free space. Recovery needs about \(ByteText.string(needed)) and \(ByteText.string(available)) is free."
-        case .needsDiskAccess:
-            return "macOS is blocking this app from reading the card. Allow Recover Photos in Full Disk Access, then scan again."
+            return "That folder doesn't have enough free space. Recovery needs about \(ByteText.string(needed)) and \(ByteText.string(available)) is free."
+        case .accessDenied:
+            return "macOS didn't allow the disk to be read."
+        case .deviceGone:
+            return "The disk was disconnected. Plug it back in and scan again."
         case .cancelled:
-            return "Canceled."
+            return "Stopped."
         case .message(let text):
             return text
         }
@@ -31,8 +34,6 @@ public enum RecoverError: Error, LocalizedError {
 
 public enum ByteText {
     public static func string(_ bytes: UInt64) -> String {
-        let formatter = ByteCountFormatter()
-        formatter.countStyle = .file
-        return formatter.string(fromByteCount: Int64(clamping: bytes))
+        ByteCountFormatter.string(fromByteCount: Int64(clamping: bytes), countStyle: .file)
     }
 }

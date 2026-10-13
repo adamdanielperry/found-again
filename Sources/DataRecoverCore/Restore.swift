@@ -14,19 +14,24 @@ public enum PhotoRestore {
         var saved: [RestoredFile] = []
         var failed: [String] = []
         var used = Set<String>()
-        for (index, file) in files.enumerated() {
+        let totalBytes = max(files.reduce(UInt64(0)) { $0 + $1.size }, 1)
+        var doneBytes: UInt64 = 0
+        for file in files {
             if isCancelled?() == true { throw RecoverError.cancelled }
-            progress?(Double(index) / Double(max(files.count, 1)), "Saving \(file.name)")
+            progress?(Double(doneBytes) / Double(totalBytes), file.name)
             do {
                 let url = try destination(for: file, in: root, used: &used)
-                let bytes = try write(file, from: reader, to: url)
+                let written = try write(file, from: reader, to: url)
                 if let modified = file.modified {
-                    try? FileManager.default.setAttributes([.modificationDate: modified], ofItemAtPath: url.path)
+                    try? FileManager.default.setAttributes([.creationDate: modified, .modificationDate: modified], ofItemAtPath: url.path)
                 }
-                saved.append(RestoredFile(url: url, bytes: bytes, name: file.name))
+                saved.append(RestoredFile(url: url, bytes: written.bytes, name: url.lastPathComponent, unreadableBytes: written.unreadable))
+            } catch let error as RecoverError where error == .deviceGone {
+                throw error
             } catch {
                 failed.append("\(file.name): \(error.localizedDescription)")
             }
+            doneBytes += file.size
         }
         progress?(1, "Saved \(saved.count) \(saved.count == 1 ? "file" : "files")")
         return RestoreReport(saved: saved, failed: failed)
@@ -74,26 +79,29 @@ public enum PhotoRestore {
         }
     }
 
-    private static func write(_ file: RecoverableFile, from reader: BlockReader, to url: URL) throws -> UInt64 {
+    private static func write(_ file: RecoverableFile, from reader: BlockReader, to url: URL) throws -> (bytes: UInt64, unreadable: UInt64) {
         let fd = open(url.path, O_CREAT | O_EXCL | O_WRONLY | O_NOFOLLOW, 0o644)
         if fd < 0 {
             throw RecoverError.message("Couldn't create \(url.lastPathComponent). \(String(cString: strerror(errno)))")
         }
         let handle = FileHandle(fileDescriptor: fd, closeOnDealloc: true)
         var written: UInt64 = 0
+        var unreadable: UInt64 = 0
         for range in file.ranges {
             var remaining = range.length
             var offset = range.offset
             while remaining > 0 {
                 let chunkCount = Int(min(remaining, 8 * 1024 * 1024))
-                let chunk = try reader.read(at: offset, count: chunkCount)
+                let (chunk, missing) = try reader.readTolerant(at: offset, count: chunkCount)
                 if chunk.isEmpty { break }
                 try handle.write(contentsOf: chunk)
                 written += UInt64(chunk.count)
+                unreadable += UInt64(missing)
                 offset += UInt64(chunk.count)
                 remaining -= UInt64(chunk.count)
             }
         }
-        return written
+        try handle.synchronize()
+        return (written, unreadable)
     }
 }

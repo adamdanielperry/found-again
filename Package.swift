@@ -12,15 +12,21 @@ let package = Package(
             name: "DataRecoverCore",
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
+        .target(
+            name: "CDiskAccess",
+            linkerSettings: [.linkedFramework("Security")]
+        ),
         .executableTarget(
             name: "DataRecover",
-            dependencies: ["DataRecoverCore"],
+            dependencies: ["DataRecoverCore", "CDiskAccess"],
             swiftSettings: [.swiftLanguageMode(.v5)],
             linkerSettings: [
                 .linkedFramework("AppKit"),
                 .linkedFramework("SwiftUI"),
                 .linkedFramework("ImageIO"),
                 .linkedFramework("CoreGraphics"),
+                .linkedFramework("DiskArbitration"),
+                .linkedFramework("QuickLookUI"),
             ]
         ),
         .testTarget(

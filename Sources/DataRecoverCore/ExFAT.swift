@@ -43,15 +43,11 @@ enum ExFATScanner {
             sink: &sink,
             used: &used
         )
-    }
-
-    /// Byte range of the cluster heap. Photos start on these boundaries.
-    static func heapRegion(reader: BlockReader, volume: FoundVolume) -> CarveRegion? {
-        guard let geometry = try? load(reader: reader, volume: volume) else { return nil }
-        let origin = geometry.offsetOfCluster(2)
-        let end = min(reader.size, origin + UInt64(geometry.clusterCount) * geometry.clusterSize)
-        guard end > origin, geometry.clusterSize >= 512 else { return nil }
-        return CarveRegion(start: origin, end: end, origin: origin, stride: geometry.clusterSize)
+        // Boot region and allocation table aren't free space.
+        let heap = geometry.offsetOfCluster(2)
+        if heap > volume.offset {
+            used.append(ByteRange(offset: volume.offset, length: heap - volume.offset))
+        }
     }
 
     private static func load(reader: BlockReader, volume: FoundVolume) throws -> ExFATGeometry {
@@ -162,7 +158,7 @@ enum ExFATScanner {
             let noChain = stream[1] & 0x02 != 0
             let entryOffset = diskOffset(index: index, map: map, clusterSize: clusterSize, geometry: geometry)
 
-            if isDirectory, firstCluster >= 2, !FileTyping.skipName(name) {
+            if isDirectory, firstCluster >= 2, !FileTyping.skipDirectory(name) {
                 let next = directory.isEmpty ? name : directory + "/" + name
                 try walk(
                     start: firstCluster,

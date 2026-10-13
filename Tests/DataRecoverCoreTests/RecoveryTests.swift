@@ -2,53 +2,66 @@ import XCTest
 @testable import DataRecoverCore
 
 final class GuardAndPathTests: XCTestCase {
-    func testMemoryCardFilterAllowsTheBuiltInSDReader() {
-        let card = DeviceFacts(
-            identifier: "disk4",
-            wholeDisk: true,
-            virtual: false,
-            removable: true,
-            ejectable: true,
-            bus: "Secure Digital",
-            internalMedia: false,
-            startup: false
-        )
-        XCTAssertTrue(DeviceGuard.isMemoryCard(card))
+    func testDeviceFilterAllowsTheBuiltInSDReader() {
+        let card = DeviceFacts(identifier: "disk4", wholeDisk: true, virtual: false, removableOrExternal: true, bus: "Secure Digital", internalDisk: false, startup: false)
+        XCTAssertTrue(DeviceGuard.isRecoverable(card))
     }
 
-    func testMemoryCardFilterRejectsTheInternalSSD() {
-        let disk = DeviceFacts(
-            identifier: "disk0",
-            wholeDisk: true,
-            virtual: false,
-            removable: false,
-            ejectable: false,
-            bus: "PCI",
-            internalMedia: false,
-            startup: true
-        )
-        XCTAssertFalse(DeviceGuard.isMemoryCard(disk))
+    func testDeviceFilterAllowsAnExternalThunderboltDrive() {
+        let drive = DeviceFacts(identifier: "disk6", wholeDisk: true, virtual: false, removableOrExternal: true, bus: "PCI-Express", internalDisk: false, startup: false)
+        XCTAssertTrue(DeviceGuard.isRecoverable(drive))
     }
 
-    func testMemoryCardFilterRejectsDiskImages() {
-        let image = DeviceFacts(
-            identifier: "disk12",
-            wholeDisk: true,
-            virtual: true,
-            removable: true,
-            ejectable: true,
-            bus: "Disk Image",
-            internalMedia: false,
-            startup: false
-        )
-        XCTAssertFalse(DeviceGuard.isMemoryCard(image))
+    func testDeviceFilterRejectsTheInternalSSD() {
+        let disk = DeviceFacts(identifier: "disk0", wholeDisk: true, virtual: false, removableOrExternal: false, bus: "Apple Fabric", internalDisk: true, startup: false)
+        XCTAssertFalse(DeviceGuard.isRecoverable(disk))
+    }
+
+    func testDeviceFilterRejectsTheStartupDiskEvenWhenExternal() {
+        let disk = DeviceFacts(identifier: "disk8", wholeDisk: true, virtual: false, removableOrExternal: true, bus: "USB", internalDisk: false, startup: true)
+        XCTAssertFalse(DeviceGuard.isRecoverable(disk))
+    }
+
+    func testDeviceFilterRejectsDiskImagesAndAPFSContainers() {
+        let image = DeviceFacts(identifier: "disk12", wholeDisk: true, virtual: true, removableOrExternal: true, bus: "Disk Image", internalDisk: false, startup: false)
+        XCTAssertFalse(DeviceGuard.isRecoverable(image))
+        XCTAssertTrue(DeviceGuard.isRecoverable(image, allowDiskImages: true))
+        let container = DeviceFacts(identifier: "disk7", wholeDisk: true, virtual: true, removableOrExternal: true, bus: "USB", internalDisk: false, startup: false)
+        XCTAssertFalse(DeviceGuard.isRecoverable(container, allowDiskImages: true))
     }
 
     func testDiskIdentifierParsing() {
         XCTAssertEqual(DeviceGuard.diskIdentifier("/dev/rdisk4"), "disk4")
         XCTAssertEqual(DeviceGuard.diskIdentifier("/dev/disk10"), "disk10")
-        XCTAssertEqual(DeviceGuard.diskIdentifier("disk4s1"), nil)
+        XCTAssertEqual(DeviceGuard.diskIdentifier("disk4s1"), "disk4")
         XCTAssertEqual(DeviceGuard.diskIdentifier("/dev/sda"), nil)
+        XCTAssertEqual(DeviceGuard.diskIdentifier("disk4; rm -rf /"), nil)
+    }
+
+    func testCameraFolderNames() {
+        XCTAssertEqual(CameraFolders.brand(forFolder: "100_FUJI"), "Fujifilm")
+        XCTAssertEqual(CameraFolders.brand(forFolder: "100CANON"), "Canon")
+        XCTAssertEqual(CameraFolders.brand(forFolder: "101MSDCF"), "Sony")
+        XCTAssertEqual(CameraFolders.brand(forFolder: "100NZ_8"), "Nikon")
+        XCTAssertEqual(CameraFolders.brand(forFolder: "100GOPRO"), "GoPro")
+        XCTAssertNil(CameraFolders.brand(forFolder: "Holiday"))
+    }
+
+    func testCategoriesFromExtensions() {
+        XCTAssertEqual(FileTyping.category(forExtension: "CR3"), .raw)
+        XCTAssertEqual(FileTyping.category(forExtension: "mts"), .video)
+        XCTAssertEqual(FileTyping.category(forExtension: "docx"), .document)
+        XCTAssertEqual(FileKind.cr3.category, .raw)
+        XCTAssertEqual(FileKind.jpeg.fileExtension, "jpg")
+    }
+
+    func testJunkNamesAreSkipped() {
+        XCTAssertTrue(FileTyping.skipFile("._DSCF0001.JPG"))
+        XCTAssertTrue(FileTyping.skipFile(".DS_Store"))
+        XCTAssertTrue(FileTyping.skipFile("Thumbs.db"))
+        XCTAssertFalse(FileTyping.skipFile("DSCF0001.JPG"))
+        XCTAssertFalse(FileTyping.skipDirectory(".Trashes"))
+        XCTAssertTrue(FileTyping.skipDirectory(".Spotlight-V100"))
     }
 
     func testOutputPathDropsParentSegments() {
@@ -62,22 +75,22 @@ final class FATLayoutTests: XCTestCase {
     func testDeletedFilesOnAHandBuiltFAT16Image() throws {
         let image = FAT16Sample.make()
         let reader = DataBlockReader(image.data)
-        let result = try PhotoRecovery.scan(reader: reader, options: ScanOptions(photosOnly: true, deepScan: false))
+        let result = try RecoveryEngine.scan(reader: reader, options: ScanOptions(deepScan: false, categories: [.photo]))
         let names = Set(result.files.map(\.name))
         XCTAssertEqual(names, Set(["Holiday Photo.JPG", "_RAG0001.JPG", "DSCF0007.JPG"]), "Found \(result.files.map(\.name))")
 
         let holiday = try XCTUnwrap(result.files.first { $0.name == "Holiday Photo.JPG" })
         XCTAssertEqual(holiday.confidence, .named)
-        XCTAssertEqual(try PhotoRecovery.read(holiday, from: reader, maxBytes: 100), image.holiday)
+        XCTAssertEqual(try RecoveryEngine.read(holiday, from: reader, maxBytes: 100), image.holiday)
 
         let frag = try XCTUnwrap(result.files.first { $0.name == "_RAG0001.JPG" })
         XCTAssertEqual(frag.confidence, .named)
-        XCTAssertEqual(try PhotoRecovery.read(frag, from: reader, maxBytes: 1000), image.fragmented)
+        XCTAssertEqual(try RecoveryEngine.read(frag, from: reader, maxBytes: 1000), image.fragmented)
         XCTAssertTrue(frag.originalPath.isEmpty || !frag.originalPath.contains(".."))
 
         let fuji = try XCTUnwrap(result.files.first { $0.name == "DSCF0007.JPG" })
         XCTAssertEqual(fuji.confidence, .estimated)
-        XCTAssertEqual(try PhotoRecovery.read(fuji, from: reader, maxBytes: 1000), image.fuji)
+        XCTAssertEqual(try RecoveryEngine.read(fuji, from: reader, maxBytes: 1000), image.fuji)
 
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent("dr-fat-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: folder) }
@@ -99,8 +112,8 @@ final class CarveTests: XCTestCase {
         var jpeg = sampleJPEG(date: "2024:05:06 07:08:09")
         jpeg.insert(contentsOf: marker(0xFE, Data("DSCF0003.JPG".utf8)), at: 2)
         var disk = Data(count: jpeg.count + 2000)
-        disk.replaceSubrange(400..<(400 + jpeg.count), with: jpeg)
-        let result = try PhotoRecovery.scan(reader: DataBlockReader(disk), options: ScanOptions(deepScan: true))
+        disk.replaceSubrange(512..<(512 + jpeg.count), with: jpeg)
+        let result = try RecoveryEngine.scan(reader: DataBlockReader(disk), options: ScanOptions(deepScan: true))
         let file = try XCTUnwrap(result.files.first { $0.kind == .jpeg })
         XCTAssertEqual(file.name, "DSCF0003.JPG")
     }
@@ -108,13 +121,13 @@ final class CarveTests: XCTestCase {
     func testJPEGCarveRecoversTheOriginalBytesAndEXIFDate() throws {
         let jpeg = sampleJPEG(date: "2024:05:06 07:08:09")
         var disk = Data(count: 4096)
-        disk.replaceSubrange(1000..<(1000 + jpeg.count), with: jpeg)
+        disk.replaceSubrange(1024..<(1024 + jpeg.count), with: jpeg)
         let reader = DataBlockReader(disk)
-        let result = try PhotoRecovery.scan(reader: reader, options: ScanOptions(photosOnly: true, deepScan: true))
+        let result = try RecoveryEngine.scan(reader: reader, options: ScanOptions(deepScan: true))
         let carved = result.files.filter { $0.confidence == .carved && $0.kind == .jpeg }
         XCTAssertEqual(carved.count, 1)
         let file = try XCTUnwrap(carved.first)
-        XCTAssertEqual(try PhotoRecovery.read(file, from: reader, maxBytes: jpeg.count + 10), jpeg)
+        XCTAssertEqual(try RecoveryEngine.read(file, from: reader, maxBytes: jpeg.count + 10), jpeg)
         let parts = Calendar(identifier: .gregorian).dateComponents([.year, .month, .day, .hour, .minute, .second], from: try XCTUnwrap(file.modified))
         XCTAssertEqual(parts.year, 2024)
         XCTAssertEqual(parts.month, 5)
@@ -127,10 +140,10 @@ final class CarveTests: XCTestCase {
     func testRealJPEGFromSipsIsCarvedWhole() throws {
         let jpeg = try sipsJPEG()
         var disk = Data(count: jpeg.count + 5000)
-        disk.replaceSubrange(2000..<(2000 + jpeg.count), with: jpeg)
-        let result = try PhotoRecovery.scan(reader: DataBlockReader(disk), options: ScanOptions(deepScan: true))
+        disk.replaceSubrange(2048..<(2048 + jpeg.count), with: jpeg)
+        let result = try RecoveryEngine.scan(reader: DataBlockReader(disk), options: ScanOptions(deepScan: true))
         let file = try XCTUnwrap(result.files.first { $0.kind == .jpeg })
-        XCTAssertEqual(try PhotoRecovery.read(file, from: DataBlockReader(disk), maxBytes: jpeg.count + 20), jpeg)
+        XCTAssertEqual(try RecoveryEngine.read(file, from: DataBlockReader(disk), maxBytes: jpeg.count + 20), jpeg)
     }
 
     func testRAFCarveUsesTheOffsetTable() throws {
@@ -138,17 +151,17 @@ final class CarveTests: XCTestCase {
         let raf = sampleRAF(jpeg: jpeg, raw: Data(repeating: 0xAB, count: 300))
         var disk = Data(count: raf.count + 100)
         disk.replaceSubrange(0..<raf.count, with: raf)
-        let result = try PhotoRecovery.scan(reader: DataBlockReader(disk), options: ScanOptions(deepScan: true))
+        let result = try RecoveryEngine.scan(reader: DataBlockReader(disk), options: ScanOptions(deepScan: true))
         let file = try XCTUnwrap(result.files.first { $0.kind == .raf })
         XCTAssertEqual(file.size, UInt64(raf.count))
     }
 
     func testMovieCarveWalksAtoms() throws {
         let movie = sampleMovie()
-        var disk = Data(count: movie.count + 100)
-        disk.replaceSubrange(50..<(50 + movie.count), with: movie)
-        let result = try PhotoRecovery.scan(reader: DataBlockReader(disk), options: ScanOptions(deepScan: true))
-        let file = try XCTUnwrap(result.files.first { $0.kind == .movie })
+        var disk = Data(count: movie.count + 1100)
+        disk.replaceSubrange(512..<(512 + movie.count), with: movie)
+        let result = try RecoveryEngine.scan(reader: DataBlockReader(disk), options: ScanOptions(deepScan: true))
+        let file = try XCTUnwrap(result.files.first { $0.kind == .mov })
         XCTAssertEqual(file.size, UInt64(movie.count))
     }
 }
@@ -193,9 +206,9 @@ final class CardImageTests: XCTestCase {
         try disk.write(to: image)
 
         let reader = try FileBlockReader(path: image.path)
-        let result = try PhotoRecovery.scan(reader: reader, options: ScanOptions(photosOnly: true, deepScan: false))
+        let result = try RecoveryEngine.scan(reader: reader, options: ScanOptions(deepScan: false))
         let match = result.files.first { file in
-            (try? PhotoRecovery.read(file, from: reader, maxBytes: jpeg.count + 8)) == jpeg
+            (try? RecoveryEngine.read(file, from: reader, maxBytes: jpeg.count + 8)) == jpeg
         }
         XCTAssertNotNil(match, "Found \(result.files.map { "\($0.name) \($0.confidence.rawValue)" })")
         XCTAssertEqual(match?.confidence, .carved)
@@ -233,7 +246,7 @@ final class CardImageTests: XCTestCase {
         attached.detach()
 
         let reader = try FileBlockReader(path: image.path)
-        let result = try PhotoRecovery.scan(reader: reader, options: ScanOptions(photosOnly: true))
+        let result = try RecoveryEngine.scan(reader: reader, options: ScanOptions(categories: [.photo, .raw, .video]))
         let names = Set(result.files.map { $0.name.lowercased() })
         XCTAssertTrue(names.contains("dscf0001.jpg"), "missing DSCF0001 in \(result.files.map(\.name)) fs=\(result.filesystem) warnings=\(result.warnings)")
         XCTAssertTrue(names.contains("dscf0099.jpg"), "missing large file in \(result.files.map(\.name))")
@@ -244,9 +257,9 @@ final class CardImageTests: XCTestCase {
             XCTAssertTrue(file.originalPath.lowercased().contains("dcim/100_fuji"), file.originalPath)
         }
         let small = try XCTUnwrap(result.files.first { $0.name.lowercased() == "dscf0001.jpg" })
-        XCTAssertEqual(try PhotoRecovery.read(small, from: reader, maxBytes: jpeg.count + 10), jpeg)
+        XCTAssertEqual(try RecoveryEngine.read(small, from: reader, maxBytes: jpeg.count + 10), jpeg)
         let big = try XCTUnwrap(result.files.first { $0.name.lowercased() == "dscf0099.jpg" })
-        XCTAssertEqual(try PhotoRecovery.read(big, from: reader, maxBytes: large.count + 10), large)
+        XCTAssertEqual(try RecoveryEngine.read(big, from: reader, maxBytes: large.count + 10), large)
         XCTAssertEqual(result.filesystem.contains(filesystem == "ExFAT" ? "ExFAT" : "FAT32"), true)
     }
 }
@@ -537,7 +550,7 @@ private final class AttachedDisk {
         for line in output.split(separator: "\n") {
             let fields = line.split(whereSeparator: { $0 == " " || $0 == "\t" }).map(String.init)
             guard let node = fields.first, node.hasPrefix("/dev/disk") else { continue }
-            if disk == nil && !node.contains("s") {
+            if disk == nil && node.range(of: #"^/dev/disk[0-9]+$"#, options: .regularExpression) != nil {
                 disk = node
             }
             if let volume = fields.last, volume.hasPrefix("/Volumes/") {

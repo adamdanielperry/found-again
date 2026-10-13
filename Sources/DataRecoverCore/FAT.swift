@@ -53,39 +53,29 @@ struct FATGeometry {
 }
 
 enum FATScanner {
+    /// Lists deleted files. Files still in use are added to `used` so the deep scan doesn't report them as found.
     static func scan(
         reader: BlockReader,
         volume: FoundVolume,
         options: ScanOptions,
-        sink: inout [RecoverableFile]
+        sink: inout [RecoverableFile],
+        used: inout [ByteRange]
     ) throws {
         guard volume.kind == .fat16 || volume.kind == .fat32 else { return }
         let geometry = try load(reader: reader, volume: volume)
-        var visited = Set<UInt32>()
+        var walker = Walker(geometry: geometry, reader: reader, options: options)
         if geometry.kind == .fat32 {
             let clusters = geometry.clusters(startingAt: geometry.rootCluster, freeMeansOneCluster: true)
-            try walk(clusters: clusters, geometry: geometry, reader: reader, directory: "", options: options, visited: &visited, sink: &sink)
+            try walker.walk(clusters: clusters, directory: "")
         } else {
             let bytes = Int(geometry.rootSectors * UInt64(geometry.bytesPerSector))
             let data = try reader.read(at: geometry.rootByteOffset, count: bytes)
-            try walk(
-                image: DirectoryImage(data: data, diskOffset: { geometry.rootByteOffset + UInt64($0) }),
-                geometry: geometry,
-                reader: reader,
-                directory: "",
-                options: options,
-                visited: &visited,
-                sink: &sink
-            )
+            try walker.walk(image: DirectoryImage(data: data, diskOffset: { geometry.rootByteOffset + UInt64($0) }), directory: "")
         }
-    }
-
-    static func heapRegion(reader: BlockReader, volume: FoundVolume) -> CarveRegion? {
-        guard let geometry = try? load(reader: reader, volume: volume) else { return nil }
-        let origin = geometry.dataByteOffset
-        let end = min(reader.size, origin + UInt64(geometry.clusterCount) * geometry.clusterSize)
-        guard end > origin, geometry.clusterSize >= 512 else { return nil }
-        return CarveRegion(start: origin, end: end, origin: origin, stride: geometry.clusterSize)
+        sink.append(contentsOf: walker.found)
+        used.append(contentsOf: walker.used)
+        // The tables and directories themselves aren't free space either.
+        used.append(ByteRange(offset: volume.offset, length: geometry.dataByteOffset - volume.offset))
     }
 
     private static func load(reader: BlockReader, volume: FoundVolume) throws -> FATGeometry {
@@ -146,15 +136,21 @@ enum FATScanner {
         )
     }
 
-    private static func walk(
-        clusters: [UInt32],
-        geometry: FATGeometry,
-        reader: BlockReader,
-        directory: String,
-        options: ScanOptions,
-        visited: inout Set<UInt32>,
-        sink: inout [RecoverableFile]
-    ) throws {
+    fileprivate struct Walker {
+        let geometry: FATGeometry
+        let reader: BlockReader
+        let options: ScanOptions
+        var visited = Set<UInt32>()
+        var found: [RecoverableFile] = []
+        var used: [ByteRange] = []
+
+        init(geometry: FATGeometry, reader: BlockReader, options: ScanOptions) {
+            self.geometry = geometry
+            self.reader = reader
+            self.options = options
+        }
+
+    mutating func walk(clusters: [UInt32], directory: String) throws {
         guard let first = clusters.first else { return }
         if !visited.insert(first).inserted { return }
         var data = Data()
@@ -166,6 +162,7 @@ enum FATScanner {
             map.append(cluster)
             if data.count > 32 * 1024 * 1024 { break }
         }
+        let geometry = self.geometry
         let image = DirectoryImage(data: data) { index in
             let clusterSize = Int(geometry.clusterSize)
             guard clusterSize > 0 else { return 0 }
@@ -174,23 +171,15 @@ enum FATScanner {
             guard which < map.count else { return 0 }
             return geometry.offsetOfCluster(map[which]) + UInt64(within)
         }
-        try walk(image: image, geometry: geometry, reader: reader, directory: directory, options: options, visited: &visited, sink: &sink)
+        try walk(image: image, directory: directory)
     }
 
-    private static func walk(
-        image: DirectoryImage,
-        geometry: FATGeometry,
-        reader: BlockReader,
-        directory: String,
-        options: ScanOptions,
-        visited: inout Set<UInt32>,
-        sink: inout [RecoverableFile]
-    ) throws {
-        if options.isCancelled?() == true { throw RecoverError.cancelled }
+    mutating func walk(image: DirectoryImage, directory: String) throws {
+        if options.cancelled { throw RecoverError.cancelled }
         var index = 0
         var pendingLFN: [Data] = []
         while index + 32 <= image.data.count {
-            if sink.count >= 100_000 { return }
+            if found.count >= 100_000 { return }
             let entry = image.data.subdata(in: index..<(index + 32))
             let first = entry[0]
             if first == 0x00 { return }
@@ -215,30 +204,29 @@ enum FATScanner {
             let entryOffset = image.diskOffset(index)
             if isDirectory {
                 let cluster = geometry.clusterNumber(entry)
-                if cluster >= 2 {
+                let name = FATScanner.displayName(entry: entry, longNames: longNames)
+                if cluster >= 2 && !FileTyping.skipDirectory(name) {
                     let clusters = geometry.clusters(startingAt: cluster, freeMeansOneCluster: true)
-                    let name = displayName(entry: entry, longNames: longNames)
-                    let next = join(directory, name)
-                    try walk(clusters: clusters, geometry: geometry, reader: reader, directory: next, options: options, visited: &visited, sink: &sink)
+                    try walk(clusters: clusters, directory: FATScanner.join(directory, name))
                 }
             } else if deleted {
-                if let file = try record(entry: entry, longNames: longNames, entryOffset: entryOffset, directory: directory, geometry: geometry, reader: reader, options: options) {
-                    sink.append(file)
+                if let file = try record(entry: entry, longNames: longNames, entryOffset: entryOffset, directory: directory) {
+                    found.append(file)
+                }
+            } else {
+                let cluster = geometry.clusterNumber(entry)
+                let size = UInt64(Binary.u32le(entry, 28) ?? 0)
+                if cluster >= 2 && size > 0 {
+                    let needed = Int(min((size + geometry.clusterSize - 1) / geometry.clusterSize, 1 << 24))
+                    let chain = geometry.follow(cluster, needed)
+                    used.append(contentsOf: ClusterMap.ranges(clusters: chain, byteCount: size, clusterSize: geometry.clusterSize, offsetOf: geometry.offsetOfCluster))
                 }
             }
             index += 32
         }
     }
 
-    private static func record(
-        entry: Data,
-        longNames: [Data],
-        entryOffset: UInt64,
-        directory: String,
-        geometry: FATGeometry,
-        reader: BlockReader,
-        options: ScanOptions
-    ) throws -> RecoverableFile? {
+    private func record(entry: Data, longNames: [Data], entryOffset: UInt64, directory: String) throws -> RecoverableFile? {
         let cluster = geometry.clusterNumber(entry)
         let size = UInt64(Binary.u32le(entry, 28) ?? 0)
         if size == 0 || size > 128 * 1024 * 1024 * 1024 || cluster < 2 { return nil }
@@ -250,31 +238,33 @@ enum FATScanner {
             offsetOf: geometry.offsetOfCluster
         )
         guard !ranges.isEmpty else { return nil }
-        var name = displayName(entry: entry, longNames: longNames)
-        if longNames.isEmpty || bestLongName(longNames, short: entry) == nil {
+        var name = FATScanner.displayName(entry: entry, longNames: longNames)
+        if longNames.isEmpty || FATScanner.bestLongName(longNames, short: entry) == nil {
             name = FileTyping.repairFujifilmShortName(name)
         }
         let when = Binary.fatDate(time: Binary.u16le(entry, 22) ?? 0, date: Binary.u16le(entry, 24) ?? 0)
+        let covered = ranges.reduce(UInt64(0)) { $0 + $1.length }
         return try FileBuilder.make(
             id: "fat-\(geometry.partitionOffset)-\(entryOffset)",
             name: name,
             directory: directory,
-            size: ranges.reduce(0) { $0 + $1.length },
+            size: covered,
             modified: when,
             confidence: allocation.confidence,
-            complete: allocation.complete && ranges.reduce(0) { $0 + $1.length } >= size,
+            complete: allocation.complete && covered >= size,
             ranges: ranges,
             reader: reader,
             options: options
         )
     }
+    }
 
-    private static func displayName(entry: Data, longNames: [Data]) -> String {
+    fileprivate static func displayName(entry: Data, longNames: [Data]) -> String {
         if let long = bestLongName(longNames, short: entry) { return long }
         return shortName(entry)
     }
 
-    private static func bestLongName(_ entries: [Data], short: Data) -> String? {
+    fileprivate static func bestLongName(_ entries: [Data], short: Data) -> String? {
         guard !entries.isEmpty else { return nil }
         for take in stride(from: entries.count, through: 1, by: -1) {
             let slice = Array(entries.suffix(take))
@@ -342,8 +332,8 @@ enum FATScanner {
         return String(bytes: kept, encoding: .ascii) ?? "FILE"
     }
 
-    private static func join(_ directory: String, _ name: String) -> String {
-        if FileTyping.skipName(name) { return directory }
+    fileprivate static func join(_ directory: String, _ name: String) -> String {
+        if name.isEmpty || name == "." || name == ".." { return directory }
         if directory.isEmpty { return name }
         return directory + "/" + name
     }
