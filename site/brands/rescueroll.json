@@ -1,0 +1,39 @@
+{
+  "id": "rescueroll",
+  "name": "Rescue Roll",
+  "domain": "rescueroll.app",
+  "tagline": "Every shot, rescued. Free.",
+  "heroTitle": "Every deleted shot,<br>rescued. Free.",
+  "icon": "rescueroll-icon.svg",
+  "fonts": {
+    "googleFamily": "Barlow+Condensed:wght@700",
+    "display": "\"Barlow Condensed\", \"SF Pro Display\", -apple-system, sans-serif",
+    "displayWeight": "700",
+    "displayTransform": "uppercase",
+    "displayTracking": "0.01em"
+  },
+  "light": {
+    "paper": "#F4F1EC",
+    "paper2": "#EAE5DD",
+    "card": "#FFFFFF",
+    "ink": "#22201D",
+    "muted": "#66605A",
+    "line": "#DDD6CC",
+    "accent": "#D9381F",
+    "accentInk": "#FFFFFF",
+    "accentSoft": "#FBE3C2",
+    "good": "#2B7A43"
+  },
+  "dark": {
+    "paper": "#171513",
+    "paper2": "#1F1C19",
+    "card": "#262320",
+    "ink": "#F3EFEA",
+    "muted": "#A9A29A",
+    "line": "#36312C",
+    "accent": "#F5A623",
+    "accentInk": "#1B1305",
+    "accentSoft": "#3A2E1D",
+    "good": "#6FCF8F"
+  }
+}

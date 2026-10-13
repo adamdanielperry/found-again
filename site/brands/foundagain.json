@@ -1,0 +1,39 @@
+{
+  "id": "foundagain",
+  "name": "Found Again",
+  "domain": "foundagain.app",
+  "tagline": "Lost photos, found again. Free.",
+  "heroTitle": "Lost photos,<br>found again.",
+  "icon": "foundagain-icon.svg",
+  "fonts": {
+    "googleFamily": "Young+Serif",
+    "display": "\"Young Serif\", \"New York\", Georgia, serif",
+    "displayWeight": "400",
+    "displayTransform": "none",
+    "displayTracking": "-0.01em"
+  },
+  "light": {
+    "paper": "#F7F3EA",
+    "paper2": "#EFE8D9",
+    "card": "#FFFDF8",
+    "ink": "#14263F",
+    "muted": "#55627A",
+    "line": "#E2D9C6",
+    "accent": "#1E3557",
+    "accentInk": "#FFF8E8",
+    "accentSoft": "#F7DFA4",
+    "good": "#2D7A4A"
+  },
+  "dark": {
+    "paper": "#0F1A2B",
+    "paper2": "#132238",
+    "card": "#172A44",
+    "ink": "#F4EBD8",
+    "muted": "#AAB6C8",
+    "line": "#243A58",
+    "accent": "#F5B83D",
+    "accentInk": "#14263F",
+    "accentSoft": "#2B3F5E",
+    "good": "#7BD3A0"
+  }
+}

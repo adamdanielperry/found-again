@@ -1,0 +1,39 @@
+{
+  "id": "unerase",
+  "name": "Unerase",
+  "domain": "unerase.app",
+  "tagline": "Deleted it? Unerase it. Free.",
+  "heroTitle": "Get deleted photos back.<br>Free, with no catch.",
+  "icon": "unerase-icon.svg",
+  "fonts": {
+    "googleFamily": "Nunito:wght@700;800",
+    "display": "\"Nunito\", ui-rounded, \"SF Pro Rounded\", -apple-system, sans-serif",
+    "displayWeight": "800",
+    "displayTransform": "none",
+    "displayTracking": "-0.02em"
+  },
+  "light": {
+    "paper": "#FFFFFF",
+    "paper2": "#FBF6F3",
+    "card": "#FFFFFF",
+    "ink": "#1C1C1E",
+    "muted": "#62626A",
+    "line": "#EDE5E1",
+    "accent": "#D9452B",
+    "accentInk": "#FFFFFF",
+    "accentSoft": "#FFEDE6",
+    "good": "#1E7F46"
+  },
+  "dark": {
+    "paper": "#141212",
+    "paper2": "#1B1817",
+    "card": "#211D1C",
+    "ink": "#F4EFED",
+    "muted": "#A9A1A0",
+    "line": "#332C2A",
+    "accent": "#FF8A63",
+    "accentInk": "#1C0B05",
+    "accentSoft": "#3A2119",
+    "good": "#63D18F"
+  }
+}
