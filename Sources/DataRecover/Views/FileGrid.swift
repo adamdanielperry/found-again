@@ -115,9 +115,22 @@ struct FileTile: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
             ZStack(alignment: .topLeading) {
-                picture
+                // The square comes from a clear shape; the picture fills it as an overlay, so wide
+                // photos and videos are cropped instead of stretching the tile.
+                Color.clear
                     .frame(maxWidth: .infinity)
                     .aspectRatio(1, contentMode: .fit)
+                    .overlay { picture }
+                    .overlay(alignment: .bottomLeading) {
+                        if file.category == .video && image != nil {
+                            Image(systemName: "play.fill")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundStyle(.white)
+                                .frame(width: 30, height: 30)
+                                .background(Circle().fill(.black.opacity(0.55)))
+                                .padding(8)
+                        }
+                    }
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                     .overlay(
                         RoundedRectangle(cornerRadius: 10, style: .continuous)
@@ -183,15 +196,6 @@ struct FileTile: View {
                 Image(nsImage: image)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
-                if file.category == .video {
-                    Image(systemName: "play.fill")
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 30, height: 30)
-                        .background(Circle().fill(.black.opacity(0.55)))
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-                        .padding(8)
-                }
             } else {
                 VStack(spacing: 6) {
                     Image(nsImage: ThumbnailCache.icon(for: file))

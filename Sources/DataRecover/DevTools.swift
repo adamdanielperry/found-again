@@ -7,6 +7,14 @@ import Foundation
 enum DevTools {
     static func runIfRequested() {
         let args = CommandLine.arguments
+        if let index = args.firstIndex(of: "--snapshot-window"), index + 1 < args.count {
+            let image = args.firstIndex(of: "--image").flatMap { $0 + 1 < args.count ? args[$0 + 1] : nil }
+            let select = args.firstIndex(of: "--select").flatMap { $0 + 1 < args.count ? Int(args[$0 + 1]) : nil } ?? 0
+            MainActor.assumeIsolated {
+                snapshotWindow(to: URL(fileURLWithPath: args[index + 1]), image: image, select: select)
+            }
+            return
+        }
         guard let index = args.firstIndex(of: "--render-thumbnails"), index + 2 < args.count else { return }
         let image = args[index + 1]
         let output = URL(fileURLWithPath: args[index + 2], isDirectory: true)
@@ -38,4 +46,45 @@ enum DevTools {
             exit(1)
         }
     }
+
+    /// Draws the main window offscreen and saves it as a PNG, for screenshots that don't need screen access.
+    ///   Unerase --snapshot-window <out.png> [--image <disk image>] [--select <count>]
+    @MainActor
+    private static func snapshotWindow(to output: URL, image: String?, select: Int) {
+        let app = NSApplication.shared
+        app.setActivationPolicy(.accessory)
+        let model = AppModel()
+        if let image {
+            model.open(image: URL(fileURLWithPath: image))
+        }
+        let host = NSHostingView(rootView: RootView().environment(model).frame(width: 1120, height: 760))
+        host.sceneBridgingOptions = [.toolbars, .title]
+        let window = NSWindow(
+            contentRect: NSRect(x: -4000, y: -4000, width: 1120, height: 760),
+            styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
+            backing: .buffered,
+            defer: false
+        )
+        window.title = Brand.name
+        window.contentView = host
+        window.orderFront(nil)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+            if let session = model.session, select > 0 {
+                for file in session.visibleFiles.filter({ $0.category == .photo }).prefix(select) {
+                    session.toggle(file)
+                }
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                let frame = window.contentView?.superview ?? host
+                guard let rep = frame.bitmapImageRepForCachingDisplay(in: frame.bounds) else { exit(1) }
+                frame.cacheDisplay(in: frame.bounds, to: rep)
+                try? rep.representation(using: .png, properties: [:])?.write(to: output)
+                print("saved \(output.path)")
+                exit(0)
+            }
+        }
+        app.run()
+    }
 }
+
+import SwiftUI
