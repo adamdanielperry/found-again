@@ -47,3 +47,20 @@ RECOVER_ALLOW_DISK_IMAGES=disk12 "dist/Found Again.app/Contents/MacOS/FoundAgain
 ```
 
 `RECOVER_DEFAULT_DESTINATION=/tmp/out` makes recoveries default to a disposable folder. `--render-thumbnails <image> <folder>` and `--snapshot-window <png> [--image <dmg>] [--select n]` check thumbnails and the window without screen access.
+
+## Principles
+
+These hold for every change:
+
+- **Read-only.** The source disk is opened read-only and recovered files are never saved back onto it.
+- **Never the Mac's own drive.** It can't be recovered from, so the app says so instead of pretending.
+- **No network access.** No analytics, crash reporting or update checks.
+- **No upsell.** The only request for money is an optional tip after files come back.
+
+## Contributing
+
+Bug reports with the camera or drive model, file system and macOS version are the most useful thing you can send. New file formats are welcome: each lives in `Sources/DataRecoverCore/Carving/`, must reject anything doubtful, and needs a test in `FormatTests.swift`.
+
+## Licence
+
+Copyright © 2026 weio Ltd. Found Again is free software under the [GNU General Public License v3.0](LICENSE): you can use, study, share and change it, and anything you distribute that's built from it must be released under the same licence.
