@@ -34,7 +34,7 @@ updated: 2026-10-13
   <li><strong>Condition labels.</strong> Like Recuva's file states, {{APP}} tells you when a file is Partial (may open with missing sections) or Damaged (the start was overwritten, so it probably won't open).</li>
 </ul>
 
-<p>One difference is that Recuva also reads NTFS file records, which Windows drives use. {{APP}} only reads FAT32 and exFAT records. On an NTFS drive it relies on the deep scan, so files come back without their names.</p>
+<p>Like Recuva, {{APP}} reads NTFS file records, which Windows drives use, so files deleted on a Windows PC usually come back with their names. It reads FAT32 and exFAT records too, which most memory cards and USB sticks use.</p>
 
 <h2>How to undelete files on a Mac with {{APP}}</h2>
 
@@ -72,7 +72,7 @@ updated: 2026-10-13
   </details>
   <details>
     <summary>Can I recover files from a Windows-formatted USB stick on a Mac?</summary>
-    <p>Yes. Most USB sticks use exFAT or FAT32, which {{APP}} reads with original names. If the stick is formatted as NTFS, the deep scan still finds photos, videos, audio and documents by their contents, without their names.</p>
+    <p>Yes. Most USB sticks use exFAT or FAT32, and some from Windows use NTFS. {{APP}} reads all three, so deleted files usually come back with their original names. The deep scan then finds photos, videos, audio and documents by their contents.</p>
   </details>
 </section>
 

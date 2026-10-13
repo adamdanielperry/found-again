@@ -4,7 +4,7 @@ A free Mac app that gets deleted photos, videos and files back from memory cards
 
 ## What it does
 
-1. **File records first.** Reads FAT16, FAT32 and exFAT directories (NTFS in progress) for deleted entries, so files come back with their names, folders and dates in seconds.
+1. **File records first.** Reads FAT16, FAT32 and exFAT directories and the NTFS master file table (including emptied Windows Recycle Bins) for deleted entries, so files come back with their names, folders and dates in seconds.
 2. **Deep scan.** Reads every 512-byte sector looking for files by their contents, so reformatted cards and lost names still work. Files found this way are named by capture date and camera model.
 3. **Recover.** Copies chosen files to a folder on the Mac. Never writes to the source; refuses to save onto it.
 

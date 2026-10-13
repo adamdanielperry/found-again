@@ -51,11 +51,11 @@ updated: 2026-10-13
 
 <p>To see how a drive is formatted, select it in Finder and choose File › Get Info, or open Disk Utility. To check TRIM on a Thunderbolt or USB4 SSD, hold the Option key, choose Apple menu › System Information, and look under NVMExpress for "TRIM Support".</p>
 
-<h2>exFAT and FAT32 vs NTFS, APFS and Mac OS Extended</h2>
+<h2>exFAT, FAT32 and NTFS vs APFS and Mac OS Extended</h2>
 
-<p>{{APP}} recovers files in two passes. The first reads the file records of exFAT and FAT32 drives. Deleted files found this way usually come back with their original names, folders and dates, and this pass works for any type of file.</p>
+<p>{{APP}} recovers files in two passes. The first reads the file records of exFAT, FAT32 and NTFS drives. Deleted files found this way usually come back with their original names, folders and dates, and this pass works for any type of file. On NTFS drives from Windows PCs, files emptied from the Windows Recycle Bin get their original name and folder back too.</p>
 
-<p>The second pass, the deep scan, reads every sector of the drive and recognizes files by their contents. It works on any external drive whatever its format, including NTFS drives from Windows PCs and Mac drives formatted as APFS or Mac OS Extended. Files found this way come back without their original names. Photos are named by the date they were taken.</p>
+<p>The second pass, the deep scan, reads every sector of the drive and recognizes files by their contents. It works on any external drive whatever its format, including Mac drives formatted as APFS or Mac OS Extended. Files found this way come back without their original names. Photos are named by the date they were taken.</p>
 
 <p>The deep scan recognizes:</p>
 
@@ -66,7 +66,7 @@ updated: 2026-10-13
   <li><strong>Documents:</strong> PDF, Word, Excel and PowerPoint (old and new formats), Pages, Numbers, Keynote and EPUB, plus ZIP archives.</li>
 </ul>
 
-<p>So for a USB stick full of documents, exFAT or FAT32 is the best case. For an APFS or NTFS drive, expect the files the deep scan recognizes, without their names.</p>
+<p>So for a USB stick or drive full of documents, exFAT, FAT32 or NTFS is the best case. For an APFS or Mac OS Extended drive, expect the files the deep scan recognizes, without their names.</p>
 
 <h2>How to recover deleted files from an external drive with {{APP}}</h2>
 
@@ -96,7 +96,7 @@ updated: 2026-10-13
   </details>
   <details>
     <summary>Can {{APP}} recover files from an NTFS drive used with Windows?</summary>
-    <p>Yes, through the deep scan, which finds the photo, video, audio and document types listed above by their contents. It doesn't read NTFS file records, so files come back without their original names.</p>
+    <p>Yes. {{APP}} reads NTFS file records, so deleted files usually come back with their original names and folders, including files emptied from the Windows Recycle Bin. Compressed or encrypted NTFS files are the exception. The deep scan then looks for anything the records no longer point to.</p>
   </details>
   <details>
     <summary>Is it safe to scan a drive with bad sectors?</summary>
