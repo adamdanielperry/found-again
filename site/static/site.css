@@ -111,7 +111,9 @@ section.block > .wrap > header p { font-size: 19px; color: var(--muted); }
 .compare th, .compare td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--line); }
 .compare th { font-size: 13px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
 .compare td.price { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.compare tr.us td { font-weight: 700; background: var(--accent-soft); }
+.compare tr.us td { font-weight: 700; background: var(--accent-soft); vertical-align: middle; }
+.compare .app-name { display: inline-flex; align-items: center; gap: 10px; }
+.compare .app-name img { width: 30px; height: 30px; flex: none; filter: drop-shadow(0 2px 4px rgba(20, 38, 63, .25)); }
 .compare tr:last-child td { border-bottom: 0; }
 .fineprint { margin-top: 12px; font-size: 14px; color: var(--muted); }
 .proof { margin: 48px auto 0; max-width: 760px; display: grid; gap: 14px; }

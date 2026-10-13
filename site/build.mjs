@@ -15,7 +15,7 @@ const release = JSON.parse(readFileSync(join(root, "release.json"), "utf8"));
 const origin = `https://${brand.domain}`;
 const buildId = Date.now().toString(36);
 
-const brewName = brand.id === "foundagain" ? "found-again" : brand.id === "rescueroll" ? "rescue-roll" : brand.id;
+const brewName = release.brew ?? brand.id;
 
 function tokens(palette) {
   return [
@@ -112,6 +112,17 @@ function page(slug, { title, description, body, ogType = "article", schema = [],
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 cpSync(join(root, "static"), out, { recursive: true });
+
+// The signed DMG is built into ../dist by scripts/release.sh and kept out of git; the site serves its own copy.
+if (available) {
+  const dmg = join(root, "..", "dist", release.file);
+  if (!existsSync(dmg)) {
+    console.error(`release.json says ${release.file} is available, but ${dmg} doesn't exist. Run scripts/release.sh first.`);
+    process.exit(1);
+  }
+  mkdirSync(join(out, "releases"), { recursive: true });
+  cpSync(dmg, join(out, "releases", release.file));
+}
 
 // Home
 page("", {

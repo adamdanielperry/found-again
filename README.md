@@ -4,6 +4,12 @@
 
 A free Mac app that gets deleted photos, videos and files back from memory cards, USB sticks and external drives. No trial, no limits, no account, and the app never goes online. A tip request appears only after a successful recovery.
 
+## Download
+
+- **[Download Found Again](https://foundagain.app/download)**, signed and notarized by Apple. macOS 14 or later, Apple silicon and Intel.
+- Or with Homebrew: `brew install --cask adamdanielperry/tap/found-again`
+- Every version is on the [releases page](https://github.com/adamdanielperry/found-again/releases).
+
 ## What it does
 
 1. **File records first.** Reads FAT16, FAT32 and exFAT directories and the NTFS master file table (including emptied Windows Recycle Bins) for deleted entries, so files come back with their names, folders and dates in seconds.
