@@ -28,6 +28,7 @@ final class AppModel {
     @ObservationIgnored private var refreshAgain = false
 
     init() {
+        MountKeeper.remountAfterCrash()
         refresh()
         monitor = DeviceMonitor { [weak self] in
             self?.refresh()
@@ -67,7 +68,7 @@ final class AppModel {
             do {
                 let reader = try DiskAccess.open(device)
                 // Stop macOS writing indexes onto the disk while it's read. If it's busy, read it anyway.
-                let unmounted = (try? DeviceCatalog.unmount(device)) ?? false
+                let unmounted = MountKeeper.unmountForReading(device)
                 DispatchQueue.main.async {
                     self?.begin(RecoverySession(source: .device(device), reader: reader, unmountedForScan: unmounted))
                 }
@@ -131,7 +132,7 @@ final class AppModel {
             }
             do {
                 let reader = try DiskAccess.open(device)
-                let unmounted = (try? DeviceCatalog.unmount(device)) ?? false
+                let unmounted = MountKeeper.unmountForReading(device)
                 DispatchQueue.main.async {
                     guard let self else { return }
                     self.opening = nil

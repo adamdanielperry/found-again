@@ -267,7 +267,7 @@ final class RecoverySession: Identifiable {
         thumbnails.clear()
         if unmountedForScan, let device {
             DispatchQueue.global(qos: .utility).async {
-                DeviceCatalog.mount(device)
+                MountKeeper.remount(device)
             }
         }
     }

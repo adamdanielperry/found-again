@@ -48,7 +48,7 @@ final class ImagingJob: Identifiable {
             } catch {
                 outcome = .failure(error)
             }
-            if unmounted { DeviceCatalog.mount(device) }
+            if unmounted { MountKeeper.remount(device) }
             DispatchQueue.main.async {
                 switch outcome {
                 case .success(let value):
