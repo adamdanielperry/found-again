@@ -38,7 +38,7 @@ enum Signatures {
     /// `head` holds up to `headLength` bytes. Checks are ordered by how often each format turns up on cards.
     static func carver(for head: UnsafeRawBufferPointer) -> SniffedCarver? {
         guard head.count >= 12 else { return nil }
-        for entry in Registry.all {
+        for entry in Registry.byLeadByte[Int(head[0])] {
             if let kind = entry.sniff(head) {
                 return SniffedCarver(kind: kind, carver: entry)
             }

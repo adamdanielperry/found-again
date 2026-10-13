@@ -8,7 +8,8 @@ public enum Previews {
         guard file.size > 0, maxBytes > 0 else { return nil }
         switch file.kind {
         case .jpeg:
-            return read(file, reader, at: 0, count: min(file.size, 2 << 20))
+            // A cut-off JPEG decodes with its lower part grey, so read all of it.
+            return whole(file, reader, maxBytes: maxBytes)
         case .raf:
             let contents = FileContents(file: file, source: reader)
             guard let layout = RAFCarver.layout(contents, at: 0), layout.jpegLength <= UInt64(maxBytes) else { return nil }

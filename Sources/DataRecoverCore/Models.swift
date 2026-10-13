@@ -326,7 +326,13 @@ public enum FileTyping {
 
     /// Kinds the carvers can recognize from their first bytes. A named file of one of these kinds
     /// whose first bytes match nothing has been overwritten. Keep in step with `Registry.all`.
-    static let verifiable: Set<FileKind> = [.jpeg, .raf, .mov, .mp4, .m4v, .threegp, .m4a, .heic, .avif, .cr3]
+    static let verifiable: Set<FileKind> = [
+        .jpeg, .heic, .avif, .png, .gif, .tiff, .webp, .bmp, .psd,
+        .raf, .cr2, .cr3, .nef, .arw, .dng, .orf, .rw2, .pef, .srw,
+        .mov, .mp4, .m4v, .threegp, .avi, .mkv, .webm,
+        .wav, .m4a, .flac,
+        .pdf, .docx, .xlsx, .pptx, .pages, .numbers, .keynote, .doc, .xls, .ppt, .epub, .zip,
+    ]
 
     /// Names that are never worth showing: macOS and Windows housekeeping files.
     static func skipFile(_ name: String) -> Bool {

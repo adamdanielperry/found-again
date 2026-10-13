@@ -77,7 +77,7 @@ final class ThumbnailCache: @unchecked Sendable {
             guard let asset = DiskAsset(file: file, reader: reader), let frame = asset.thumbnail(maxPixels: 420) else { return nil }
             return NSImage(cgImage: frame, size: NSSize(width: frame.width, height: frame.height))
         }
-        guard let data = PreviewBytes.data(for: file, reader: reader),
+        guard let data = Previews.imageData(for: file, reader: reader),
               let source = CGImageSourceCreateWithData(data as CFData, [kCGImageSourceShouldCache: false] as CFDictionary)
         else { return nil }
         let options: [CFString: Any] = [
@@ -95,36 +95,5 @@ final class ThumbnailCache: @unchecked Sendable {
         let ext = FileTyping.extensionOf(file.name)
         let type = UTType(filenameExtension: ext.isEmpty ? file.kind.fileExtension : ext) ?? .data
         return NSWorkspace.shared.icon(for: type)
-    }
-}
-
-/// Bytes ImageIO can draw a thumbnail from, read from as little of the file as possible.
-enum PreviewBytes {
-    static let limit = 40 * 1024 * 1024
-
-    static func data(for file: RecoverableFile, reader: BlockReader) -> Data? {
-        if file.kind == .raf {
-            return rafPreview(file, reader: reader)
-        }
-        guard file.size <= UInt64(limit) else {
-            // Big raw files: ImageIO usually finds the embedded preview in the first part.
-            return try? RecoveryEngine.read(file, from: reader, maxBytes: limit)
-        }
-        return try? RecoveryEngine.read(file, from: reader, maxBytes: Int(file.size))
-    }
-
-    /// Fujifilm RAW keeps a full-size JPEG at an offset given in its header.
-    private static func rafPreview(_ file: RecoverableFile, reader: BlockReader) -> Data? {
-        guard let header = try? RecoveryEngine.read(file, from: reader, maxBytes: 160),
-              header.count >= 0x5C,
-              header.starts(with: Data("FUJIFILMCCD-RAW ".utf8))
-        else { return nil }
-        func u32(_ at: Int) -> UInt32 {
-            (UInt32(header[at]) << 24) | (UInt32(header[at + 1]) << 16) | (UInt32(header[at + 2]) << 8) | UInt32(header[at + 3])
-        }
-        let offset = u32(0x54)
-        let length = u32(0x58)
-        guard length > 32 else { return nil }
-        return try? RecoveryEngine.read(file, from: reader, fileOffset: UInt64(offset), maxBytes: min(Int(length), limit))
     }
 }
