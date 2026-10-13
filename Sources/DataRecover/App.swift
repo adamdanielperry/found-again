@@ -7,6 +7,10 @@ struct RecoverApp: App {
     @State private var model = AppModel()
     @Environment(\.openURL) private var openURL
 
+    init() {
+        DevTools.runIfRequested()
+    }
+
     var body: some Scene {
         Window(Brand.name, id: "main") {
             RootView()
@@ -18,6 +22,8 @@ struct RecoverApp: App {
         .commands {
             CommandGroup(replacing: .appInfo) {
                 Button("About \(Brand.name)") { AboutPanel.show() }
+                // No built-in updater: the app never connects to the internet by itself.
+                Button("Check for Updates…") { openURL(Brand.updates) }
             }
             CommandGroup(replacing: .newItem) {
                 Button("Open Disk Image…") { model.chooseImage() }

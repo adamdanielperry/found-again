@@ -4,11 +4,16 @@ import SwiftUI
 /// Everything that changes with the product's name and look lives here.
 enum Brand {
     static let name = "Unerase"
+    static let domain = "unerase.app"
     static let tagline = "Get deleted photos and files back. Free."
-    static let website = URL(string: "https://unerase.app")!
-    static let donate = URL(string: "https://unerase.app/thanks")!
-    static let help = URL(string: "https://unerase.app/help")!
-    static let support = URL(string: "mailto:hello@unerase.app")!
+    static let website = URL(string: "https://\(domain)")!
+    static let donate = URL(string: "https://\(domain)/thanks")!
+    static let help = URL(string: "https://\(domain)/help")!
+    static let support = URL(string: "mailto:hello@\(domain)")!
+    static var updates: URL {
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
+        return URL(string: "https://\(domain)/download?from=\(version)")!
+    }
     /// Default parent folder for recovered files, inside ~/Pictures or ~/Documents.
     static let recoveredFolderName = "Recovered with Unerase"
 

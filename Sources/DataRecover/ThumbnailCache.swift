@@ -28,7 +28,7 @@ final class ThumbnailCache: @unchecked Sendable {
     }
 
     func image(for file: RecoverableFile) async -> NSImage? {
-        guard file.kind.hasImagePreview else { return nil }
+        guard file.kind.hasImagePreview || Self.isPlayableVideo(file) else { return nil }
         if let hit = cached(file) { return hit }
         return await withCheckedContinuation { continuation in
             lock.lock()
@@ -67,8 +67,16 @@ final class ThumbnailCache: @unchecked Sendable {
         cache.removeAllObjects()
     }
 
+    static func isPlayableVideo(_ file: RecoverableFile) -> Bool {
+        file.category == .video && DiskAsset.contentType(for: file) != nil && file.quality != .damaged
+    }
+
     /// Reads the whole picture (or its embedded preview). Partial reads draw half-grey thumbnails.
     private static func render(_ file: RecoverableFile, reader: BlockReader) -> NSImage? {
+        if isPlayableVideo(file) {
+            guard let asset = DiskAsset(file: file, reader: reader), let frame = asset.thumbnail(maxPixels: 420) else { return nil }
+            return NSImage(cgImage: frame, size: NSSize(width: frame.width, height: frame.height))
+        }
         guard let data = PreviewBytes.data(for: file, reader: reader),
               let source = CGImageSourceCreateWithData(data as CFData, [kCGImageSourceShouldCache: false] as CFDictionary)
         else { return nil }

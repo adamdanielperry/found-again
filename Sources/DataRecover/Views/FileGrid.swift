@@ -61,6 +61,11 @@ struct FileGrid: View {
             preview(file)
             return .handled
         }
+        .onKeyPress(characters: CharacterSet(charactersIn: "a")) { press in
+            guard press.modifiers.contains(.command) else { return .ignored }
+            session.selectAllVisible()
+            return .handled
+        }
     }
 }
 
@@ -90,7 +95,7 @@ private struct SectionHeader: View {
         .padding(.vertical, 10)
         .padding(.horizontal, 4)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.background.opacity(0.92))
+        .background(Color(nsColor: .windowBackgroundColor).opacity(0.94))
     }
 
     private var allSelected: Bool {
@@ -178,6 +183,15 @@ struct FileTile: View {
                 Image(nsImage: image)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
+                if file.category == .video {
+                    Image(systemName: "play.fill")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 30, height: 30)
+                        .background(Circle().fill(.black.opacity(0.55)))
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+                        .padding(8)
+                }
             } else {
                 VStack(spacing: 6) {
                     Image(nsImage: ThumbnailCache.icon(for: file))

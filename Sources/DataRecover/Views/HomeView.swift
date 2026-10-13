@@ -8,18 +8,20 @@ struct HomeView: View {
     private let columns = [GridItem(.adaptive(minimum: 230, maximum: 320), spacing: 16)]
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 28) {
-                header
-                devices
-                otherPlaces
-                Spacer(minLength: 0)
-                promise
+        GeometryReader { geometry in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 28) {
+                    header
+                    devices
+                    otherPlaces
+                    Spacer(minLength: 12)
+                    promise
+                }
+                .padding(.horizontal, 40)
+                .padding(.vertical, 36)
+                .frame(maxWidth: 860, minHeight: geometry.size.height, alignment: .topLeading)
+                .frame(maxWidth: .infinity)
             }
-            .padding(.horizontal, 40)
-            .padding(.vertical, 36)
-            .frame(maxWidth: 860, alignment: .leading)
-            .frame(maxWidth: .infinity)
         }
         .background(Color(nsColor: .windowBackgroundColor))
     }

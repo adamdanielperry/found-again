@@ -373,7 +373,7 @@ public enum OutputPath {
         return cleaned.joined(separator: "/")
     }
 
-    static func sanitize(_ component: String) -> String {
+    public static func sanitize(_ component: String) -> String {
         var out = ""
         for scalar in component.unicodeScalars {
             if scalar.value < 32 || scalar == "/" || scalar == "\\" || scalar == ":" {
