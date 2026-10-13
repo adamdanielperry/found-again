@@ -83,12 +83,7 @@ p { margin: 0; }
 .sheet .frame { aspect-ratio: 4 / 3; border-radius: 8px; position: relative; overflow: hidden; }
 .sheet .frame::after { content: "✓"; position: absolute; right: 7px; bottom: 7px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 700; color: #fff; background: var(--good); }
 .sheet code { font: 12.5px ui-monospace, "SF Mono", Menlo, monospace; color: var(--muted); }
-.f1 { background: linear-gradient(160deg, #F6C28B 0%, #E2725B 55%, #6B3E5E 100%); }
-.f2 { background: linear-gradient(200deg, #9BC4E2 0%, #4F7FA8 50%, #22364D 100%); }
-.f3 { background: linear-gradient(170deg, #CFE3B5 0%, #7FA36A 50%, #3E5A3B 100%); }
-.f4 { background: linear-gradient(150deg, #F3E1C4 0%, #C9A27A 50%, #5E4632 100%); }
-.f5 { background: linear-gradient(190deg, #E8D5F0 0%, #A889C4 50%, #4B3A63 100%); }
-.f6 { background: linear-gradient(165deg, #BFE6E8 0%, #4FA3A9 50%, #1F4D57 100%); }
+.sheet .frame img { display: block; width: 100%; height: 100%; object-fit: cover; }
 @media (max-width: 760px) { .sheet ul { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
 /* Promise strip */
@@ -119,6 +114,8 @@ section.block > .wrap > header p { font-size: 19px; color: var(--muted); }
 .compare tr.us td { font-weight: 700; background: var(--accent-soft); }
 .compare tr:last-child td { border-bottom: 0; }
 .fineprint { margin-top: 12px; font-size: 14px; color: var(--muted); }
+.proof { margin: 48px auto 0; max-width: 760px; display: grid; gap: 14px; }
+.proof figcaption { text-align: center; color: var(--muted); font-size: 15px; }
 
 .features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px 28px; }
 .features div { display: grid; gap: 8px; align-content: start; }
