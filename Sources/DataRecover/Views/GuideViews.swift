@@ -10,7 +10,7 @@ struct MacGuideView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Deleted from this Mac?")
                     .font(Brand.title(24))
-                Text("Your Mac's own drive erases deleted files within minutes, and it's always encrypted. That means no app — free or paid — can scan it and get them back, whatever the ads say. These places often still have a copy:")
+                Text("Your Mac's own drive clears deleted files automatically, and it's always encrypted. That means no app — free or paid — can scan it and get them back, whatever the ads say. These places often still have a copy:")
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }

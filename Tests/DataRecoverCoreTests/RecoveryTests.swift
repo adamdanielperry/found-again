@@ -7,6 +7,12 @@ final class GuardAndPathTests: XCTestCase {
         XCTAssertTrue(DeviceGuard.isRecoverable(card))
     }
 
+    func testDeviceFilterAllowsACardInTheMacsOwnSDSlot() {
+        // MacBook Pro SD slots report as internal, with removable media.
+        let card = DeviceFacts(identifier: "disk4", wholeDisk: true, virtual: false, removableOrExternal: true, bus: "Secure Digital", internalDisk: true, startup: false)
+        XCTAssertTrue(DeviceGuard.isRecoverable(card))
+    }
+
     func testDeviceFilterAllowsAnExternalThunderboltDrive() {
         let drive = DeviceFacts(identifier: "disk6", wholeDisk: true, virtual: false, removableOrExternal: true, bus: "PCI-Express", internalDisk: false, startup: false)
         XCTAssertTrue(DeviceGuard.isRecoverable(drive))

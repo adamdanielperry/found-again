@@ -111,7 +111,7 @@ page("", {
   description: `Recover deleted photos, videos and files from SD cards, USB sticks and external drives on your Mac. Free, with no limits, no trial and no account.`,
   body: readFileSync(join(root, "templates", "home.html"), "utf8"),
   ogType: "website",
-  schema: [app, faqSchema(readFileSync(join(root, "templates", "home.html"), "utf8"))],
+  schema: [app, faqSchema(fill(readFileSync(join(root, "templates", "home.html"), "utf8"), shared))],
 });
 
 // Guides and other written pages
@@ -123,14 +123,12 @@ for (const name of existsSync(contentDir) ? readdirSync(contentDir).sort() : [])
   const { meta, body } = parse(join(contentDir, name));
   const isGuide = !["faq", "why-free", "privacy", "thanks", "download"].includes(slug);
   if (isGuide) guides.push({ slug, meta });
-  const related = guides.length ? "" : "";
   const article = `
 <article class="article"><div class="wrap">
   <nav class="crumbs" aria-label="Breadcrumb"><a href="/">{{name}}</a> › ${isGuide ? '<a href="/guides">Guides</a> › ' : ""}${escapeHTML(meta.h1 ?? slug)}</nav>
   <h1>${meta.h1 ?? slug}</h1>
   ${meta.updated ? `<p class="updated">Updated ${new Date(meta.updated).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</p>` : ""}
   <div class="prose">${body.replace(/<table>/g, '<div class="table-scroll"><table>').replace(/<\/table>/g, "</table></div>")}</div>
-  ${related}
 </div></article>`;
   page(slug, {
     title: meta.title ?? slug,
@@ -138,7 +136,8 @@ for (const name of existsSync(contentDir) ? readdirSync(contentDir).sort() : [])
     body: article,
     schema: [
       isGuide ? { "@type": "Article", headline: meta.h1 ?? meta.title, dateModified: meta.updated, author: { "@type": "Organization", name: "weio Ltd" } } : null,
-      faqSchema(body),
+      // Structured data is read by search engines as-is, so placeholders must be filled first.
+      faqSchema(fill(body, shared)),
     ],
   });
 }

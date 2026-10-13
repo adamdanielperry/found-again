@@ -29,10 +29,13 @@ public struct DeviceFacts: Equatable {
 }
 
 public enum DeviceGuard {
-    /// Only whole, physical, external disks. Never this Mac's own drive, a disk image, or an APFS container.
+    /// Only whole, physical disks that are external or removable. Never this Mac's own drive, the startup disk,
+    /// a disk image, or an APFS container. A MacBook's built-in SD slot counts as internal but holds removable
+    /// media, so cards in it are allowed.
     public static func isRecoverable(_ facts: DeviceFacts, allowDiskImages: Bool = false) -> Bool {
         let idOK = facts.identifier.range(of: #"^disk[0-9]+$"#, options: .regularExpression) != nil
-        guard idOK, facts.wholeDisk, !facts.internalDisk, !facts.startup else { return false }
+        guard idOK, facts.wholeDisk, !facts.startup else { return false }
+        if facts.internalDisk && !facts.removableOrExternal { return false }
         if facts.virtual {
             return allowDiskImages && facts.bus.lowercased() == "disk image"
         }
