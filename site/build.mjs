@@ -161,7 +161,8 @@ for (const name of existsSync(contentDir) ? readdirSync(contentDir).sort() : [])
   });
 }
 
-// Guide index
+// Guide index. Alphabetical, except pages with an `order` (lowest first) lead.
+guides.sort((a, b) => Number(a.meta.order ?? 100) - Number(b.meta.order ?? 100));
 page("guides", {
   title: `Recovery guides for Mac · ${brand.name}`,
   description: "Step-by-step guides to getting deleted photos, videos and files back on a Mac, from SD cards, camera cards, USB sticks and external drives.",

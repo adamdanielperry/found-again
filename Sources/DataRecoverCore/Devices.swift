@@ -244,10 +244,11 @@ public enum DeviceCatalog {
     }
 
     private static func classify(bus: String, media: String, removable: Bool, camera: Bool, virtual: Bool) -> Device.Kind {
+        // Camera folders mean a camera card, even when it's an attached image of one.
+        if bus.contains("secure digital") || camera { return .memoryCard }
         if virtual { return .diskImage }
         let lower = media.lowercased()
         let cardWords = ["sd", "card", "reader", "sdxc", "sdhc", "microsd", "cfexpress", "compactflash", "xqd", "multi-card"]
-        if bus.contains("secure digital") || camera { return .memoryCard }
         if cardWords.contains(where: { lower.contains($0) }) { return .memoryCard }
         if removable { return .usbDrive }
         return .externalDrive

@@ -58,6 +58,7 @@ final class RecoverySession: Identifiable {
 
     @ObservationIgnored private let stopFlag = StopFlag()
     @ObservationIgnored private var pendingRebuild = false
+    @ObservationIgnored private var lastRebuild = Date.distantPast
     @ObservationIgnored private var knownIDs = Set<String>()
     @ObservationIgnored let thumbnails: ThumbnailCache
 
@@ -167,17 +168,24 @@ final class RecoverySession: Identifiable {
 
     // MARK: Filtering
 
-    /// Batches arrive several times a second during a scan. Regroup at most twice a second.
+    /// Batches arrive several times a second during a scan. Show the first one at once,
+    /// then regroup at most twice a second.
     private func scheduleRebuild() {
         guard !pendingRebuild else { return }
+        let wait = 0.5 - Date().timeIntervalSince(lastRebuild)
+        guard wait > 0 else {
+            rebuild()
+            return
+        }
         pendingRebuild = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + wait) { [weak self] in
             self?.pendingRebuild = false
             self?.rebuild()
         }
     }
 
     private func rebuild() {
+        lastRebuild = Date()
         let query = search.trimmingCharacters(in: .whitespaces).lowercased()
         var list = files.filter { file in
             if let category, file.category != category { return false }

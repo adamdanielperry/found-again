@@ -162,6 +162,16 @@ details > p, details > ul, details > ol { padding-bottom: 16px; color: var(--mut
 .prose a.download { display: inline-flex; background: var(--accent); color: var(--accent-ink); border-radius: 999px; padding: 11px 20px; font-weight: 600; text-decoration: none; justify-self: start; }
 .prose section.faq { display: grid; gap: 0; }
 .prose code { font: 0.88em ui-monospace, "SF Mono", Menlo, monospace; background: var(--paper2); padding: 1px 5px; border-radius: 5px; }
+.prose figure { margin: 8px 0; display: grid; gap: 12px; }
+.prose figure > img { display: block; width: 100%; height: auto; border-radius: 16px; background: var(--paper2); }
+.prose figure .window { box-shadow: 0 18px 44px -18px rgba(20, 20, 30, .32), 0 4px 12px -6px rgba(20, 20, 30, .16); }
+.prose figcaption { font-size: 14.5px; color: var(--muted); }
+.prose figcaption a { color: inherit; }
+@media (min-width: 980px) { .prose figure.wide { margin-inline: -70px; } .prose figure.wide figcaption { padding-inline: 70px; } }
+.prose ol.walkthrough { list-style: none; padding: 0; counter-reset: walk; gap: 44px; }
+.prose ol.walkthrough > li { counter-increment: walk; display: grid; gap: 14px; }
+.prose ol.walkthrough h2 { margin-top: 0; display: flex; align-items: baseline; gap: 14px; }
+.prose ol.walkthrough h2::before { content: counter(walk); flex: none; display: inline-grid; place-items: center; width: 1.5em; height: 1.5em; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-size: .62em; font-family: inherit; font-weight: 700; transform: translateY(-.12em); }
 .related { margin-top: 48px; padding-top: 28px; border-top: 1px solid var(--line); display: grid; gap: 14px; }
 .related ul { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 24px; }
 @media (max-width: 560px) { .related ul { grid-template-columns: minmax(0, 1fr); } }
