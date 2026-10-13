@@ -1,0 +1,121 @@
+<!--
+title: PhotoRec on Mac: How to Use It, and a Simpler Alternative
+description: PhotoRec is free and powerful, but on a Mac it means Terminal, sudo and files named f1234567.jpg. How to use it, and how {{APP}} compares.
+h1: PhotoRec on Mac: how it works, and a simpler alternative
+keywords: PhotoRec Mac; PhotoRec alternative Mac; PhotoRec GUI Mac; TestDisk Mac; free photo recovery Mac
+updated: 2026-10-13
+-->
+
+<p>PhotoRec is a free, open-source recovery tool from CGSecurity, and it runs on a Mac. It's genuinely good at finding photos, videos and documents on memory cards and drives. On a Mac, though, it runs in Terminal, needs administrator rights, and saves what it finds under generic names like f1234567.jpg. This guide explains how to use PhotoRec on a Mac, where people usually get stuck, and how {{APP}} compares if you'd rather use a regular Mac app.</p>
+
+<a class="download" href="/download">Download {{APP}} free</a>
+
+<h2>What PhotoRec does well</h2>
+
+<ul>
+  <li><strong>It knows a huge number of formats.</strong> CGSecurity lists more than 480 file extensions in about 300 file families.</li>
+  <li><strong>It works when the file system is gone.</strong> PhotoRec ignores the file system and reads the underlying data, so it can find files after a format or on a damaged card.</li>
+  <li><strong>It's read-only on the source.</strong> It reads the card or drive and writes recovered files somewhere else.</li>
+  <li><strong>It's free and runs almost everywhere,</strong> including Windows, Linux and macOS.</li>
+  <li><strong>It has a sibling, TestDisk,</strong> which can undelete files with their original names from FAT, exFAT and NTFS when the file system is intact.</li>
+</ul>
+
+<h2>How to run PhotoRec on a Mac</h2>
+
+<p>There are two ways to get it.</p>
+
+<ul>
+  <li><strong>Homebrew.</strong> If you use Homebrew, run <code>brew install testdisk</code>. This installs PhotoRec and TestDisk, and Homebrew provides native Apple silicon builds.</li>
+  <li><strong>The CGSecurity website.</strong> The current stable release, 7.2, is offered for Mac as an Intel build only. It runs on Apple silicon through Rosetta 2. Apple has said Rosetta will stop being available for general apps after macOS 27, so this route has a limited future on Apple silicon Macs.</li>
+</ul>
+
+<p>Then, with your card in a card reader:</p>
+
+<ol>
+  <li>Open Terminal and run <code>sudo photorec</code>. Enter your Mac's password. (For the website build, go to the folder you extracted and run <code>sudo ./photorec</code> instead.)</li>
+  <li>Choose the disk with the arrow keys. Pick it by size, and double-check it's the card, not your Mac's drive.</li>
+  <li>Choose the partition, then open File Opt if you want to limit the search to certain file types, such as jpg and mov. This saves wading through thousands of unwanted files later.</li>
+  <li>When asked for the file system type, choose Other for FAT, exFAT and NTFS.</li>
+  <li>Choose whether to search only the free space (where deleted files are) or the whole partition. After a format, choose the whole partition.</li>
+  <li>Choose a destination folder on your Mac, never on the card, and confirm it with the key shown on screen.</li>
+  <li>Wait. PhotoRec saves files into folders called recup_dir.1, recup_dir.2 and so on as it goes.</li>
+</ol>
+
+<h2>Why people get stuck with PhotoRec on a Mac</h2>
+
+<h3>Terminal and sudo</h3>
+
+<p>Everything happens in a text interface driven by arrow keys and Enter. It's well designed for what it is, but it's unfamiliar to many Mac users, and running anything with <code>sudo</code> feels risky if you haven't done it before.</p>
+
+<h3>Gatekeeper blocks the download</h3>
+
+<p>The website build isn't notarized by Apple, so macOS refuses to run it at first. Since macOS Sequoia, Control-clicking and choosing Open no longer gets around this. You have to try to run it, then go to System Settings › Privacy &amp; Security, scroll down and click Open Anyway, then confirm with your password. Many people stop here.</p>
+
+<h3>macOS privacy prompts</h3>
+
+<p>Reading a memory card at a low level can trigger macOS privacy prompts for Terminal. If you've denied one before, PhotoRec may not see the card until you allow Terminal in System Settings › Privacy &amp; Security.</p>
+
+<h3>Generic file names and flat folders</h3>
+
+<p>PhotoRec names most files by where it found them on the disk, so you get names like f1234567.jpg. Original names and folders are lost, except for some formats that store a name inside the file. The results land in numbered recup_dir folders with no grouping by date or camera.</p>
+
+<h3>No preview while it works</h3>
+
+<p>There's no gallery or thumbnails. You find out what it recovered by opening the recup_dir folders in Finder, which can hold thousands of files, many of them fragments or types you didn't want unless you used File Opt.</p>
+
+<h2>PhotoRec vs {{APP}}</h2>
+
+<table>
+  <thead>
+    <tr><th></th><th>PhotoRec</th><th>{{APP}}</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Price</td><td>Free, open source</td><td>Free, no limits</td></tr>
+    <tr><td>How you use it</td><td>Terminal, keyboard menus</td><td>Mac app</td></tr>
+    <tr><td>Apple silicon</td><td>Native through Homebrew; website build is Intel only</td><td>Native on Apple silicon and Intel</td></tr>
+    <tr><td>Opens without warnings</td><td>Homebrew build, yes; website build needs Open Anyway</td><td>Yes, signed and notarized by Apple</td></tr>
+    <tr><td>Original names of deleted files</td><td>Only when the name is stored inside the file (TestDisk can undelete names separately)</td><td>Reads FAT32 and exFAT file records first, so deleted files usually keep their names, folders and dates</td></tr>
+    <tr><td>Files found by content</td><td>Named by position, like f1234567.jpg</td><td>Photos named by date taken, like 2024-06-01 14.30.00.jpg, with the camera model</td></tr>
+    <tr><td>Preview</td><td>None</td><td>Thumbnails, including video frames, grouped by day</td></tr>
+    <tr><td>Results while scanning</td><td>Files saved as found</td><td>Files listed as found; recover any time</td></tr>
+    <tr><td>File formats</td><td>480+ extensions</td><td>Main photo, RAW, video, audio and document formats (<a href="/faq">see the list</a>)</td></tr>
+    <tr><td>Damaged files</td><td>Option to keep corrupted files</td><td>Marks files Partial or Damaged before you recover</td></tr>
+    <tr><td>Runs on</td><td>Mac, Windows, Linux and more</td><td>Mac only (macOS 14 or later)</td></tr>
+  </tbody>
+</table>
+
+<h2>When PhotoRec is the better choice</h2>
+
+<ul>
+  <li>You need a file type {{APP}}'s deep scan doesn't recognize. PhotoRec's format list is far longer.</li>
+  <li>You're on Windows or Linux, or recovering on a machine that isn't a Mac.</li>
+  <li>You're comfortable in Terminal and want fine control, such as its paranoid and brute-force options.</li>
+</ul>
+
+<p>For photos and videos from a camera card on a Mac, especially files that were just deleted, {{APP}} is usually quicker to use, and it brings files back with their names when the card's file records survive. Nothing stops you trying both. Both only read the card.</p>
+
+<section class="faq">
+  <h2>Questions</h2>
+  <details>
+    <summary>Is there a PhotoRec GUI for Mac?</summary>
+    <p>Not officially. QPhotoRec, PhotoRec's graphical version, isn't offered in the Mac downloads, and Homebrew's testdisk package installs the command-line tools. CGSecurity's download page points people who want a graphical app to Disk Drill, which charges to recover files on Mac.</p>
+  </details>
+  <details>
+    <summary>Does PhotoRec work on Apple silicon Macs?</summary>
+    <p>Yes. Homebrew's build runs natively. The build on CGSecurity's website is for Intel and runs through Rosetta 2, which Apple has said will stop being available for general apps after macOS 27.</p>
+  </details>
+  <details>
+    <summary>Why did PhotoRec give me thousands of .txt files?</summary>
+    <p>PhotoRec recognizes many kinds of data, including fragments of text. Before you start, open File Opt and turn on only the types you want, such as jpg, cr3, mov and mp4.</p>
+  </details>
+  <details>
+    <summary>How can I rename PhotoRec's files by date?</summary>
+    <p>The free tool ExifTool can rename photos using the date they were taken. With Homebrew, run <code>brew install exiftool</code>, then, in the folder that holds the recup_dir folders, run <code>exiftool '-FileName&lt;DateTimeOriginal' -d '%Y-%m-%d %H.%M.%S%%-c.%%e' recup_dir.*</code>. Files without a date keep their names. Try it on a copy first.</p>
+  </details>
+  <details>
+    <summary>Is PhotoRec safe to use?</summary>
+    <p>Yes. It's well established and only reads the source disk. Download it from cgsecurity.org or install it with Homebrew, and always save recovered files to a different disk from the one you're recovering.</p>
+  </details>
+</section>
+
+<a class="download" href="/download">Download {{APP}} free</a>

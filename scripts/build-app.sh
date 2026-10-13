@@ -27,11 +27,14 @@ plutil -replace CFBundleIdentifier -string "$BUNDLE_ID" "$APP/Contents/Info.plis
 plutil -replace CFBundleShortVersionString -string "$VERSION" "$APP/Contents/Info.plist"
 plutil -replace CFBundleVersion -string "$BUILD" "$APP/Contents/Info.plist"
 
-if [[ -f Support/Assets.car ]]; then
-  cp Support/Assets.car "$APP/Contents/Resources/Assets.car"
-fi
-if [[ -f Support/AppIcon.icns ]]; then
-  cp Support/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
+# The icon is an Icon Composer file. actool turns it into Assets.car (layered, for macOS 26+) and an .icns for older systems.
+ICON_SOURCE="Support/Icons/$ICON.icon"
+if [[ -d "$ICON_SOURCE" ]]; then
+  ICON_WORK="$(mktemp -d)"
+  cp -R "$ICON_SOURCE" "$ICON_WORK/AppIcon.icon"
+  xcrun actool "$ICON_WORK/AppIcon.icon" --compile "$PWD/$APP/Contents/Resources" --platform macosx \
+    --minimum-deployment-target 14.0 --app-icon AppIcon --output-partial-info-plist "$ICON_WORK/partial.plist" >/dev/null
+  rm -rf "$ICON_WORK"
 fi
 chmod 755 "$APP/Contents/MacOS/$APP_NAME"
 

@@ -1,0 +1,19 @@
+{
+  "fill" : {
+    "linear-gradient" : [
+      "extended-srgb:0.20392,0.18824,0.17255,1.00000",
+      "extended-srgb:0.10588,0.09804,0.08627,1.00000"
+    ]
+  },
+  "groups" : [
+    {
+      "layers" : [
+        { "image-name" : "canister.svg", "name" : "canister" },
+        { "image-name" : "ring.svg", "name" : "ring" }
+      ],
+      "shadow" : { "kind" : "neutral", "opacity" : 0.5 },
+      "translucency" : { "enabled" : true, "value" : 0.3 }
+    }
+  ],
+  "supported-platforms" : { "squares" : [ "macOS" ] }
+}
