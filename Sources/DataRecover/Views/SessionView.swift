@@ -8,6 +8,7 @@ struct SessionView: View {
     @Bindable var session: RecoverySession
     @State private var job: RecoveryJob?
     @State private var previewURL: URL?
+    @State private var previewing: RecoverableFile?
     @State private var tileSize: Double = 150
     @State private var confirmLeave = false
 
@@ -41,6 +42,18 @@ struct SessionView: View {
                 if eject, let device = session.device {
                     model.eject(device)
                 }
+            }
+        }
+        .sheet(item: $previewing) { file in
+            PreviewSheet(session: session, file: file) { chosen in
+                previewing = nil
+                // Let the preview finish closing before the next sheet opens.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    job = RecoveryJob(files: [chosen], session: session)
+                }
+            } openElsewhere: { chosen in
+                previewing = nil
+                quickLook(chosen)
             }
         }
         .quickLookPreview($previewURL)
@@ -122,7 +135,17 @@ struct SessionView: View {
         }
     }
 
+    /// Photos and playable videos open in the app's own viewer, read straight off the disk.
+    /// Everything else goes through Quick Look, which needs a temporary copy.
     private func preview(_ file: RecoverableFile) {
+        if file.kind.hasImagePreview || ThumbnailCache.isPlayableVideo(file) {
+            previewing = file
+        } else {
+            quickLook(file)
+        }
+    }
+
+    private func quickLook(_ file: RecoverableFile) {
         let reader = session.reader
         DispatchQueue.global(qos: .userInitiated).async {
             let url = QuickLookExport.export(file, reader: reader)

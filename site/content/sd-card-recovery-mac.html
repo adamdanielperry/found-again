@@ -1,0 +1,121 @@
+<!--
+title: Recover Deleted Photos from an SD Card on a Mac (Free)
+description: Deleted photos from an SD card? They're usually still there. What to do right now, and how to recover them on a Mac for free, step by step.
+h1: How to recover deleted photos from an SD card on a Mac
+keywords: recover deleted photos from SD card on Mac; SD card recovery Mac; free SD card recovery; memory card recovery Mac; undelete photos SD card
+updated: 2026-10-13
+-->
+
+<p>If you've deleted photos from an SD card, they are very likely still on it. Deleting a photo, whether in the camera or on a Mac, only marks its space on the card as free. The picture stays exactly where it was until something new is saved over it. This guide shows you how to recover deleted photos from an SD card on a Mac, what to do in the next few minutes to keep your chances high, and what decides whether a photo comes back.</p>
+
+<a class="download" href="/download">Download {{APP}} free</a>
+
+<h2>What to do right now</h2>
+
+<ol>
+  <li><strong>Stop using the card.</strong> Switch the camera off and take the card out. Every new photo or video you take could land on top of one you want back.</li>
+  <li><strong>Don't format it.</strong> If the camera offers to format the card, say no. If your Mac says the disk isn't readable and offers to initialize it, click Ignore or Eject. Formatting makes recovery harder, and some formats wipe the card completely.</li>
+  <li><strong>Use a card reader.</strong> Your Mac's SD slot or a USB card reader both work. Most cameras connected with a USB cable only show up in Photos or Image Capture, and recovery apps can't read the card that way.</li>
+  <li><strong>Don't save anything to the card.</strong> Don't copy files onto it, and don't open and edit photos while they're on it.</li>
+  <li><strong>Check you have space on your Mac.</strong> Recovered photos go to a folder on your Mac, never back onto the card, so you'll need room for them.</li>
+</ol>
+
+<aside class="note">Every time a Mac mounts a card, macOS may write a few small hidden files to it, such as a search index. That's usually harmless, but it's one more reason to plug the card in only when you're ready to recover.</aside>
+
+<h2>Why deleted photos are usually still on the card</h2>
+
+<p>Almost every camera card uses one of two file systems. Cards up to 32 GB use FAT32, and larger cards use exFAT. Both keep a list of the files on the card, with each file's name, date, size and where it starts.</p>
+
+<p>When you delete a photo, the camera or Mac marks that entry in the list as deleted and marks the photo's space as free. The picture itself is left alone. Right after a deletion, the photo is usually intact, and its old entry often still holds the original name and date.</p>
+
+<p>Recovery works in two ways. The first reads those deleted entries, so files come back with their names, folders and dates. The second ignores the list and reads the whole card, recognizing photos and videos by what's inside them. That second method still works after the list has been wiped, for example after a <a href="/formatted-sd-card">format</a>.</p>
+
+<p>Because the photo's space is marked free, the next photo you take may be written right over it. That's why stopping straight away matters more than anything else in this guide.</p>
+
+<h2>How to recover deleted photos from an SD card with {{APP}}</h2>
+
+<p>{{APP}} is a free Mac app built for this job. It only reads the card, it has no file limits, and it never connects to the internet. It runs on macOS 14 Sonoma or later, on Apple silicon and Intel Macs.</p>
+
+<ol>
+  <li><strong>Download and open {{APP}}.</strong> It's signed and notarized by Apple, so it opens like any other app. There's no account to create.</li>
+  <li><strong>Insert the card.</strong> Put it in your Mac's SD slot or a USB card reader. The card appears in {{APP}}'s list by itself. microSD cards work the same way with an adapter or a microSD reader.</li>
+  <li><strong>Click Scan.</strong> macOS asks for your Mac's password. That's macOS's own password box, and it lets macOS open the card read-only for {{APP}}. You're asked once per scan.</li>
+  <li><strong>Let the scan run.</strong> The card disappears from Finder while it's being scanned. That's deliberate: {{APP}} unmounts it so macOS can't write search indexes or other files onto it during recovery.</li>
+  <li><strong>Watch the results arrive.</strong> {{APP}} first reads the card's file records, which is very fast and usually brings deleted files back with their original names, folders and dates. Then the deep scan reads every sector of the card and finds photos and videos by their contents. Results appear as they're found, with thumbnails grouped by day.</li>
+  <li><strong>Choose what you want.</strong> Filter by Photos, RAW, Videos, Audio or Documents, select the files, or select everything showing.</li>
+  <li><strong>Click Recover and pick a folder on your Mac.</strong> {{APP}} won't save files back onto the card you're recovering from. You can recover at any time, even while the deep scan is still running.</li>
+</ol>
+
+<p>If macOS shows a privacy message instead of scanning, {{APP}} shows you how to allow it in System Settings › Privacy &amp; Security › Full Disk Access. You only need to do this once.</p>
+
+<h3>How long it takes</h3>
+
+<p>Reading the file records takes very little time. The deep scan reads the whole card, so it depends on the card's size and your reader. As a rule of thumb, allow 1 to 3 minutes per 10 GB with a USB 3 card reader, and longer with an older USB 2 reader. A 64 GB card typically takes somewhere between 6 and 20 minutes. You don't have to wait for the end before recovering what's already been found.</p>
+
+<h3>What the file names mean</h3>
+
+<p>Photos found through the card's file records keep their camera names, such as IMG_0042.JPG or DSCF1234.RAF, in their original folders. Photos found by the deep scan have no record left to name them, so {{APP}} names them by the date and time they were taken, like 2024-06-01 14.30.00.jpg, along with the camera model (Canon EOS R6, for example).</p>
+
+<h3>Partial and Damaged files</h3>
+
+<p>Some files are marked Partial or Damaged. Partial means part of the file couldn't be traced, so it may open with missing sections. Damaged means the start of the file has been overwritten, so it probably won't open. Both usually happen because new photos or videos were saved over part of the old file.</p>
+
+<p>If the card has unreadable spots, {{APP}} keeps going. It fills the parts it can't read with blanks and lists the affected files in a note saved alongside your recovered files.</p>
+
+<h2>What affects your chances</h2>
+
+<ul>
+  <li><strong>How much the card was used afterwards.</strong> Each new photo or video can overwrite deleted ones. A card with plenty of free space and few new shots gives the best results.</li>
+  <li><strong>How the photos were lost.</strong> Deleting photos, one at a time or all at once, leaves the most behind. A normal format removes the names but usually leaves the photos. A full or low-level format in the camera wipes the card.</li>
+  <li><strong>File size.</strong> Photos are small and usually stored in one piece. Long videos on a big, well-used card can be split into pieces scattered across the card, and those sometimes come back Partial.</li>
+  <li><strong>The card's file system.</strong> FAT32 and exFAT, used by nearly all camera cards, give the best results, including original names. See the <a href="/camera-guides">camera-by-camera guides</a> for where each brand keeps its files.</li>
+  <li><strong>The card's condition.</strong> A few bad sectors won't stop a scan. A card that's cracked, or that no reader detects at all, needs a professional recovery service.</li>
+  <li><strong>Encryption.</strong> A card that a phone set up as encrypted internal storage can't be scanned.</li>
+</ul>
+
+<h2>If the photos aren't there</h2>
+
+<ul>
+  <li>If the card doesn't appear at all, try a different card reader or USB port, and check the lock switch on the side of a full-size SD card or adapter.</li>
+  <li>If you imported the photos to your Mac before deleting them, look in Photos › Recently Deleted, where they're kept for 30 days. Our guide to <a href="/recover-deleted-files-mac-ssd">files deleted from a Mac's own drive</a> covers the other places to check.</li>
+  <li>If you sent photos to your phone with the camera maker's app, they may still be in your phone's photo library.</li>
+  <li>If you shot to two cards at once, the other card may still have copies.</li>
+</ul>
+
+<h2>Other free options</h2>
+
+<p>PhotoRec is free and capable, but it runs in Terminal and gives recovered files generic names. Our <a href="/photorec-mac-alternative">PhotoRec on Mac guide</a> explains how to use it. Most other recovery apps let you scan for free and then charge to save the files; our <a href="/disk-drill-free-alternative">comparison of Disk Drill and the alternatives</a> lists what each one's free version really does.</p>
+
+<h2>Avoiding this next time</h2>
+
+<ul>
+  <li>Copy photos to your Mac and check they open before deleting anything from the card.</li>
+  <li>Once the files are safely copied, format the card in the camera instead of deleting photos one by one. This also helps keep future videos in one piece.</li>
+  <li>Keep a second copy of anything important, for example with Time Machine or on an external drive.</li>
+</ul>
+
+<section class="faq">
+  <h2>Questions</h2>
+  <details>
+    <summary>Can I recover deleted photos from an SD card for free?</summary>
+    <p>Yes. {{APP}} is free with no limits, so you can scan the card and save every file it finds without paying. PhotoRec is also free if you're comfortable using Terminal.</p>
+  </details>
+  <details>
+    <summary>Can I recover photos I deleted weeks or months ago?</summary>
+    <p>Often, yes. Time on its own doesn't erase anything. What matters is whether new photos or files have been saved over the deleted ones since. A card that has sat in a drawer is a good candidate, even months later.</p>
+  </details>
+  <details>
+    <summary>Does this work for microSD cards from phones, drones and action cameras?</summary>
+    <p>Yes, as long as you take the card out and read it with a card reader or a microSD adapter. A phone connected to the Mac by cable can't be scanned, and a microSD card that an Android phone set up as internal storage is encrypted, so it can't be scanned either.</p>
+  </details>
+  <details>
+    <summary>Why doesn't my camera show up when I connect it to my Mac?</summary>
+    <p>Most cameras connected by USB cable appear only in apps like Photos or Image Capture, not as a disk, so recovery software can't read the card. Take the card out and use your Mac's SD slot or a card reader instead.</p>
+  </details>
+  <details>
+    <summary>Will recovery change anything on the card?</summary>
+    <p>No. macOS opens the card read-only, {{APP}} unmounts it during the scan so macOS doesn't write to it, and recovered files are always saved somewhere else.</p>
+  </details>
+</section>
+
+<a class="download" href="/download">Download {{APP}} free</a>
