@@ -56,6 +56,9 @@ struct RootView: View {
             }
         }
         .sheet(isPresented: $model.showMacGuide) { MacGuideView() }
+        .sheet(item: $model.imaging) { job in
+            ImagingSheet(job: job) { scan in model.finishImaging(scan: scan) }
+        }
         .sheet(isPresented: $model.showPrivacyHelp) { PrivacyHelpView() }
         .alert(item: $model.alert) { alert in
             Alert(title: Text(alert.title), message: Text(alert.message))

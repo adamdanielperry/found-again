@@ -166,6 +166,61 @@ final class CarveTests: XCTestCase {
     }
 }
 
+final class FailingMediaTests: XCTestCase {
+    /// Behaves like a card with a bad patch: reads touching it fail.
+    private final class BadPatchReader: BlockReader, @unchecked Sendable {
+        let data: Data
+        let bad: Range<UInt64>
+        var size: UInt64 { UInt64(data.count) }
+
+        init(data: Data, bad: Range<UInt64>) {
+            self.data = data
+            self.bad = bad
+        }
+
+        func read(at offset: UInt64, count: Int) throws -> Data {
+            let end = offset + UInt64(count)
+            if offset < bad.upperBound && end > bad.lowerBound {
+                throw RecoverError.readFailed("I/O error")
+            }
+            return try DataBlockReader(data).read(at: offset, count: count)
+        }
+    }
+
+    func testDiskCopyIsByteForByte() throws {
+        var disk = Data(count: 3 * 1024 * 1024 + 4096)
+        for index in stride(from: 0, to: disk.count, by: 7) { disk[index] = UInt8(index % 251) }
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("dr-image-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let url = folder.appendingPathComponent("card.img")
+        let result = try DiskImager.copy(DataBlockReader(disk), to: url)
+        XCTAssertEqual(result.unreadable, 0)
+        XCTAssertEqual(try Data(contentsOf: url), disk)
+    }
+
+    func testBadSectorsBecomeZerosAndTheRestSurvives() throws {
+        var disk = Data(repeating: 0xAB, count: 64 * 1024)
+        let jpeg = Data([0xFF, 0xD8, 0xFF, 0xD9])
+        disk.replaceSubrange(0..<4, with: jpeg)
+        let reader = BadPatchReader(data: disk, bad: 8192..<12288)
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("dr-bad-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let url = folder.appendingPathComponent("card.img")
+        let result = try DiskImager.copy(reader, to: url)
+        XCTAssertEqual(result.unreadable, 4096)
+        let copy = try Data(contentsOf: url)
+        XCTAssertEqual(copy.count, disk.count)
+        XCTAssertEqual(copy.subdata(in: 8192..<12288), Data(count: 4096))
+        XCTAssertEqual(copy.subdata(in: 0..<8192), disk.subdata(in: 0..<8192))
+        XCTAssertEqual(copy.subdata(in: 12288..<copy.count), disk.subdata(in: 12288..<disk.count))
+        // A deep scan over the same bad patch finishes and reports what it couldn't read.
+        let scan = try RecoveryEngine.scan(reader: reader, options: ScanOptions(deepScan: true))
+        XCTAssertEqual(scan.unreadableBytes, 4096)
+    }
+}
+
 final class CardImageTests: XCTestCase {
     func testExFATDeletionOnAPartitionedImage() throws {
         try assertCameraDeletion(filesystem: "ExFAT", megabytes: 48)

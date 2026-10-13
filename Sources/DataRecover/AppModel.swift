@@ -19,6 +19,7 @@ final class AppModel {
     /// The device whose password prompt or unmount is in progress.
     private(set) var opening: String?
     var alert: AppAlert?
+    var imaging: ImagingJob?
     var showMacGuide = false
     var showPrivacyHelp = false
 
@@ -89,6 +90,77 @@ final class AppModel {
                     self?.alert = AppAlert(title: "Couldn't read “\(device.name)”", message: error.localizedDescription)
                 }
             }
+        }
+    }
+
+    /// Asks where to save, then copies the whole disk into a disk image file.
+    func saveCopy(of device: Device) {
+        guard opening == nil, session == nil, imaging == nil else { return }
+        let panel = NSSavePanel()
+        panel.title = "Save a Copy of “\(device.name)”"
+        panel.message = "The copy is the full size of the disk (\(ByteText.string(device.size))). Save it on this Mac or another drive, not on the disk itself."
+        panel.prompt = "Save Copy"
+        panel.nameFieldStringValue = "\(OutputPath.sanitize(device.name)) \(Date().formatted(.iso8601.year().month().day())).img"
+        panel.allowedContentTypes = [UTType(filenameExtension: "img") ?? .diskImage]
+        panel.canCreateDirectories = true
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        if FileManager.default.fileExists(atPath: url.path) {
+            try? FileManager.default.removeItem(at: url)
+        }
+        opening = device.id
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            if DeviceCatalog.destination(url, isOn: device) {
+                DispatchQueue.main.async {
+                    self?.opening = nil
+                    self?.alert = AppAlert(title: "Choose another place for the copy", message: RecoverError.destinationOnSource.localizedDescription)
+                }
+                return
+            }
+            let parent = url.deletingLastPathComponent()
+            let free = (try? parent.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]))?
+                .volumeAvailableCapacityForImportantUsage.map { UInt64(max($0, 0)) }
+            if let free, free < device.size + 100 * 1024 * 1024 {
+                DispatchQueue.main.async {
+                    self?.opening = nil
+                    self?.alert = AppAlert(
+                        title: "Not enough space for the copy",
+                        message: RecoverError.notEnoughSpace(needed: device.size, available: free).localizedDescription
+                    )
+                }
+                return
+            }
+            do {
+                let reader = try DiskAccess.open(device)
+                let unmounted = (try? DeviceCatalog.unmount(device)) ?? false
+                DispatchQueue.main.async {
+                    guard let self else { return }
+                    self.opening = nil
+                    let job = ImagingJob(device: device, destination: url)
+                    self.imaging = job
+                    job.start(reader: reader, unmounted: unmounted)
+                }
+            } catch let failure as DiskAccess.Failure {
+                DispatchQueue.main.async {
+                    self?.opening = nil
+                    if case .privacy = failure { self?.showPrivacyHelp = true }
+                    else if case .cancelled = failure {}
+                    else { self?.alert = AppAlert(title: "Couldn't read “\(device.name)”", message: failure.localizedDescription) }
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self?.opening = nil
+                    self?.alert = AppAlert(title: "Couldn't read “\(device.name)”", message: error.localizedDescription)
+                }
+            }
+        }
+    }
+
+    func finishImaging(scan: Bool) {
+        guard let job = imaging else { return }
+        imaging = nil
+        refresh()
+        if scan, case .done = job.state {
+            open(image: job.destination)
         }
     }
 

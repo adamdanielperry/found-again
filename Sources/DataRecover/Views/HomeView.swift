@@ -46,6 +46,8 @@ struct HomeView: View {
                 ForEach(model.devices) { device in
                     DeviceCard(device: device, opening: model.opening == device.id, disabled: model.opening != nil) {
                         model.open(device)
+                    } saveCopy: {
+                        model.saveCopy(of: device)
                     }
                 }
             }
@@ -94,10 +96,35 @@ struct DeviceCard: View {
     let opening: Bool
     let disabled: Bool
     let action: () -> Void
+    let saveCopy: () -> Void
 
     @State private var hovering = false
 
     var body: some View {
+        card
+            .overlay(alignment: .bottomTrailing) {
+                Menu {
+                    Button("Scan for Deleted Files", action: action)
+                    Button("Save a Copy of This Disk…", action: saveCopy)
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                        .font(.title3)
+                        .foregroundStyle(.secondary)
+                }
+                .menuStyle(.borderlessButton)
+                .menuIndicator(.hidden)
+                .fixedSize()
+                .padding(14)
+                .disabled(disabled)
+                .help("More options")
+            }
+            .contextMenu {
+                Button("Scan for Deleted Files", action: action)
+                Button("Save a Copy of This Disk…", action: saveCopy)
+            }
+    }
+
+    private var card: some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 14) {
                 HStack(alignment: .top) {
