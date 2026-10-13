@@ -6,6 +6,18 @@ enum Registry {
         JPEGCarver(),
         RAFCarver(),
         ISOMediaCarver(),
+        TIFFRawCarver(),
+        PNGCarver(),
+        GIFCarver(),
+        RIFFCarver(),
+        PDFCarver(),
+        ZIPCarver(),
+        OLE2Carver(),
+        MP3Carver(),
+        FLACCarver(),
+        MatroskaCarver(),
+        PSDCarver(),
+        BMPCarver(),
     ]
 
     /// Carvers that can start with each possible first byte, so most sectors are rejected with one lookup.
@@ -296,6 +308,89 @@ final class ByteWindow {
                 return windowStart + UInt64(found)
             }
             position = windowStart + UInt64(window.count)
+        }
+        return nil
+    }
+
+    /// Makes `count` bytes from `offset` sit inside one window, reading a fresh window from `offset` when they straddle its end.
+    private func ensure(_ offset: UInt64, count: Int) -> Bool {
+        let needEnd = offset + UInt64(count)
+        if offset >= windowStart && needEnd <= windowStart + UInt64(window.count) { return true }
+        guard count > 0, needEnd <= end else { return false }
+        let fill = Int(min(UInt64(max(windowSize, count)), end - offset))
+        guard let chunk = try? reader.read(at: offset, count: fill), chunk.count >= count else { return false }
+        window = chunk
+        windowStart = offset
+        return true
+    }
+
+    /// Lends `count` bytes at `offset` without copying them. Nil past the end.
+    func withBytes<T>(at offset: UInt64, count: Int, _ body: (UnsafeRawBufferPointer) -> T) -> T? {
+        guard ensure(offset, count: count) else { return nil }
+        let local = Int(offset - windowStart)
+        return window.withUnsafeBytes { raw in
+            body(UnsafeRawBufferPointer(rebasing: raw[local..<(local + count)]))
+        }
+    }
+
+    func u32be(at offset: UInt64) -> UInt32? {
+        withBytes(at: offset, count: 4) { $0.u32be(0) }
+    }
+
+    func u16le(at offset: UInt64) -> UInt16? {
+        withBytes(at: offset, count: 2) { $0.u16le(0) }
+    }
+
+    func u32le(at offset: UInt64) -> UInt32? {
+        withBytes(at: offset, count: 4) { $0.u32le(0) }
+    }
+
+    func u64le(at offset: UInt64) -> UInt64? {
+        withBytes(at: offset, count: 8) { UInt64($0.u32le(0)) | (UInt64($0.u32le(4)) << 32) }
+    }
+
+    func u64be(at offset: UInt64) -> UInt64? {
+        withBytes(at: offset, count: 8) { (UInt64($0.u32be(0)) << 32) | UInt64($0.u32be(4)) }
+    }
+
+    /// Position of the first `pattern` at or after `offset` that ends by `limit`, or nil.
+    func find(_ pattern: [UInt8], from offset: UInt64, before limit: UInt64? = nil) -> UInt64? {
+        findFirst(of: [pattern], from: offset, before: limit)?.offset
+    }
+
+    /// The earliest match of any of `patterns`, with which one matched. Uses memmem over whole windows,
+    /// so searching hundreds of megabytes costs about as much as reading them.
+    func findFirst(of patterns: [[UInt8]], from offset: UInt64, before limit: UInt64? = nil) -> (index: Int, offset: UInt64)? {
+        let stop = min(limit ?? end, end)
+        let longest = patterns.map(\.count).max() ?? 0
+        let shortest = patterns.map(\.count).min() ?? 0
+        guard shortest > 0 else { return nil }
+        var position = offset
+        while position + UInt64(shortest) <= stop {
+            guard ensure(position, count: Int(min(UInt64(longest), stop - position))) else { return nil }
+            let local = Int(position - windowStart)
+            let available = Int(min(UInt64(window.count - local), stop - position))
+            var best: (index: Int, offset: Int)?
+            window.withUnsafeBytes { raw in
+                guard let base = raw.baseAddress?.advanced(by: local) else { return }
+                for (index, pattern) in patterns.enumerated() where pattern.count <= available {
+                    // Only an earlier match than the best so far matters.
+                    let span = min(available, best.map { $0.offset + pattern.count } ?? available)
+                    let hit: Int? = pattern.withUnsafeBytes { needle in
+                        guard let needleBase = needle.baseAddress,
+                              let found = memmem(base, span, needleBase, pattern.count)
+                        else { return nil }
+                        return UnsafeRawPointer(found) - base
+                    }
+                    if let hit, hit < (best?.offset ?? Int.max) {
+                        best = (index, hit)
+                    }
+                }
+            }
+            if let best { return (best.index, position + UInt64(best.offset)) }
+            // Step back by one pattern length so a match straddling the window's end is still seen.
+            if position + UInt64(available) >= stop { return nil }
+            position += UInt64(max(1, available - longest + 1))
         }
         return nil
     }
