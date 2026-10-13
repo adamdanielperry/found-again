@@ -6,7 +6,8 @@ enum Signatures {
     static let headLength = 32
 
     /// Kinds that have no dependable signature, so a header that matches nothing is not a sign of damage.
-    static let unrecognizable: Set<FileKind> = [.mp3, .other]
+    /// MP3s often start straight with audio frames; AIFF has no carver.
+    static let unrecognizable: Set<FileKind> = [.mp3, .aiff, .other]
 
     static func kind(of header: Data) -> FileKind? {
         header.withUnsafeBytes { raw in
@@ -21,7 +22,7 @@ enum Signatures {
     /// A claimed kind (from a file name) is fine when the bytes are the same family.
     static func compatible(_ seen: FileKind, _ claimed: FileKind) -> Bool {
         if seen == claimed { return true }
-        let tiffFamily: Set<FileKind> = [.tiff, .cr2, .nef, .arw, .dng, .pef, .srw]
+        let tiffFamily: Set<FileKind> = [.tiff, .cr2, .nef, .arw, .dng, .pef, .srw, .orf, .rw2]
         if tiffFamily.contains(seen) && tiffFamily.contains(claimed) { return true }
         let isoFamily: Set<FileKind> = [.mov, .mp4, .m4v, .threegp, .m4a, .heic, .avif, .cr3]
         if isoFamily.contains(seen) && isoFamily.contains(claimed) { return true }
@@ -53,6 +54,9 @@ struct SniffedCarver {
 
 /// Measures one format. Implementations must be strict: a false match makes the scan skip real data.
 protocol FormatCarver {
+    /// First bytes this format can start with, or nil for any. Declared here, not only in an extension,
+    /// so the lead-byte table sees each carver's own list rather than the default.
+    var leadBytes: [UInt8]? { get }
     /// The kind of file starting with `head`, or nil. Must be cheap: it runs at every sector.
     func sniff(_ head: UnsafeRawBufferPointer) -> FileKind?
     /// Where the file ends and what it says about itself. Nil when the structure doesn't hold up.
