@@ -1,0 +1,172 @@
+<!--
+title: Recover Deleted Photos by Camera: Canon, Sony, GoPro & More
+description: Where Canon, Nikon, Sony, Fujifilm, Lumix, OM System, GoPro, DJI and Insta360 save files, what they're called, and how to recover deleted photos and videos.
+h1: Recovering deleted photos and videos, camera by camera
+keywords: recover deleted photos from camera SD card; Canon SD card recovery; Sony camera video recovery; GoPro video recovery Mac; DJI drone footage recovery
+updated: 2026-10-13
+-->
+
+<p>To recover deleted photos from a camera's SD card, it helps to know where your camera keeps its files and what it calls them. Every major brand follows the same basic layout, with a few twists, especially for video. This page covers Canon, Nikon, Sony, Fujifilm, Panasonic Lumix, OM System and Olympus, GoPro, DJI drones and Insta360: their folders, file names and RAW formats, what their format options do, and tips for getting video back.</p>
+
+<p>Whatever the camera, the first steps are the same. Stop shooting, take the card out, and read it with a card reader on your Mac. A camera connected by USB cable usually doesn't show up as a disk.</p>
+
+<a class="download" href="/download">Download {{APP}} free</a>
+
+<h2>How cameras organize a memory card</h2>
+
+<p>Almost every camera follows a standard called DCF. Photos go in a folder called DCIM. Inside it are numbered folders from 100 to 999, each with a five-character suffix chosen by the maker, such as 100CANON. File names are eight characters, usually a four-letter prefix and a four-digit number, such as IMG_0001.JPG.</p>
+
+<p>When {{APP}} finds deleted files through the card's file records, they come back in these folders with these names. When it finds them with the deep scan, after a format for example, the folders and names are gone, so photos are named by the date and time they were taken, along with the camera model.</p>
+
+<table>
+  <thead>
+    <tr><th>Camera</th><th>Photo folder</th><th>Typical file names</th><th>RAW</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><a href="#canon">Canon</a></td><td>DCIM/100CANON or DCIM/100EOSR5</td><td>IMG_0001.JPG, MVI_0001.MP4</td><td>CR3, CR2</td></tr>
+    <tr><td><a href="#nikon">Nikon</a></td><td>DCIM/100NIKON or DCIM/100NCZ_8</td><td>DSC_0001.JPG</td><td>NEF</td></tr>
+    <tr><td><a href="#sony">Sony</a></td><td>DCIM/100MSDCF; video in PRIVATE/M4ROOT/CLIP</td><td>DSC00001.JPG, C0001.MP4</td><td>ARW</td></tr>
+    <tr><td><a href="#fujifilm">Fujifilm</a></td><td>DCIM/100_FUJI</td><td>DSCF0001.JPG, DSCF0001.MOV</td><td>RAF</td></tr>
+    <tr><td><a href="#panasonic">Panasonic Lumix</a></td><td>DCIM/100_PANA</td><td>P1000001.JPG</td><td>RW2</td></tr>
+    <tr><td><a href="#om-system">OM System / Olympus</a></td><td>DCIM/100OMSYS or DCIM/100OLYMP</td><td>P6010001.JPG</td><td>ORF</td></tr>
+    <tr><td><a href="#gopro">GoPro</a></td><td>DCIM/100GOPRO</td><td>GOPR0001.JPG, GX010001.MP4</td><td>GPR</td></tr>
+    <tr><td><a href="#dji">DJI drones</a></td><td>DCIM/100MEDIA on many models</td><td>DJI_0001.JPG, DJI_0001.MP4</td><td>DNG</td></tr>
+    <tr><td><a href="#insta360">Insta360</a></td><td>DCIM/Camera01</td><td>VID_…​.insv, IMG_…​.insp</td><td>Varies by model</td></tr>
+  </tbody>
+</table>
+
+<h2 id="canon">Canon</h2>
+
+<ul>
+  <li><strong>Folders:</strong> many models use DCIM/100CANON. Newer EOS R bodies name the folder after the camera, such as 100EOSR5 or 100EOSR6.</li>
+  <li><strong>Photos:</strong> IMG_0001.JPG. If the camera is set to the Adobe RGB color space, names start with an underscore instead, like _MG_0001.JPG.</li>
+  <li><strong>RAW:</strong> CR3 on current models, CR2 on older DSLRs. The deep scan finds both.</li>
+  <li><strong>Video:</strong> usually MVI_0001.MP4, or MOV on many older models. Cinema RAW Light clips (.CRM) can come back by name if the file records survive, but the deep scan doesn't look for them.</li>
+</ul>
+
+<p><strong>Formatting:</strong> Canon's normal format only changes the card's file management information, so photos can usually be recovered. The Format card screen also has a "Low level format" checkbox. With it ticked, Canon says the camera erases all recordable sectors, and nothing can be recovered.</p>
+
+<h2 id="nikon">Nikon</h2>
+
+<ul>
+  <li><strong>Folders:</strong> a three-digit number plus a five-character name. Nikon's manuals give the Z8's default as NCZ_8, so the first folder is 100NCZ_8. Some older models use 100NIKON.</li>
+  <li><strong>Photos:</strong> DSC_0001.JPG. In Adobe RGB, names start _DSC0001.</li>
+  <li><strong>RAW:</strong> NEF, which the deep scan finds.</li>
+  <li><strong>Video:</strong> DSC_0001.MOV or .MP4. N-RAW clips (.NEV) on the Z8 and Z9 can come back by name if the file records survive, but the deep scan doesn't look for them.</li>
+</ul>
+
+<p><strong>Formatting:</strong> Nikon doesn't document whether its format erases photo data. If you formatted by mistake, stop shooting and scan the card. A quick look will tell you.</p>
+
+<h2 id="sony">Sony</h2>
+
+<ul>
+  <li><strong>Photos:</strong> DCIM/100MSDCF, with names like DSC00001.JPG.</li>
+  <li><strong>RAW:</strong> ARW, which the deep scan finds.</li>
+  <li><strong>Video:</strong> stored separately, in PRIVATE/M4ROOT/CLIP. Clips are named C0001.MP4, each with a small XML file of metadata. Proxy copies, if you turned proxy recording on, go in PRIVATE/M4ROOT/SUB. Older models that record AVCHD keep .MTS files under PRIVATE/AVCHD. Those can come back by name if the file records survive, but the deep scan doesn't look for MTS.</li>
+</ul>
+
+<p><strong>Formatting:</strong> newer Sony cameras ask you to choose Full Format or Quick Format. Sony says Quick Format only initializes the data management information, so photos can usually be recovered. Full Format initializes the whole card, including the data area, and nothing can be recovered. On some older models, pressing the Delete button on the format screen starts a full format.</p>
+
+<h2 id="fujifilm">Fujifilm</h2>
+
+<ul>
+  <li><strong>Folders:</strong> DCIM/100_FUJI.</li>
+  <li><strong>Photos:</strong> DSCF0001.JPG. In Adobe RGB, names start _DSF.</li>
+  <li><strong>RAW:</strong> RAF, which the deep scan finds.</li>
+  <li><strong>Video:</strong> DSCF0001.MOV in the same folder on most models.</li>
+</ul>
+
+<p>Photos deleted in the camera usually come back with their names, for example DCIM/100_FUJI/DSCF0001.JPG. Fujifilm cards are where {{APP}} began (<a href="/why-free">here's the story</a>).</p>
+
+<p><strong>Formatting:</strong> Fujifilm doesn't document what its format does to the data. Scan the card before reusing it.</p>
+
+<h2 id="panasonic">Panasonic Lumix</h2>
+
+<ul>
+  <li><strong>Folders:</strong> DCIM/100_PANA.</li>
+  <li><strong>Photos:</strong> P1000001.JPG. The 100 in the name matches the folder number.</li>
+  <li><strong>RAW:</strong> RW2, which the deep scan finds.</li>
+  <li><strong>Video:</strong> newer models save MP4 or MOV files alongside the photos. Older models that record AVCHD keep .MTS files under PRIVATE/AVCHD, which can come back by name but aren't on the deep scan's list.</li>
+</ul>
+
+<p><strong>Formatting:</strong> on the GH6 and GH7, the Card Format screen offers "Low Level Format" for CFexpress cards. That's the deeper option. The standard format on other models doesn't have a low-level checkbox.</p>
+
+<h2 id="om-system">OM System and Olympus</h2>
+
+<ul>
+  <li><strong>Folders:</strong> DCIM/100OMSYS on OM System cameras, DCIM/100OLYMP on Olympus-branded ones.</li>
+  <li><strong>Photos:</strong> the name includes the date. P6010001.JPG means June 1st, picture 0001. The second character is the month (1 to 9, then A, B and C for October to December), the next two are the day.</li>
+  <li><strong>RAW:</strong> ORF, which the deep scan finds.</li>
+  <li><strong>Video:</strong> MOV files with the same naming.</li>
+</ul>
+
+<p>The date in the name is handy when you're sorting recovered files by hand. If the deep scan named a photo by its date, you can rebuild the camera's name from it.</p>
+
+<h2 id="gopro">GoPro</h2>
+
+<ul>
+  <li><strong>Folders:</strong> DCIM/100GOPRO.</li>
+  <li><strong>Video:</strong> GX010001.MP4 (H.265/HEVC) or GH010001.MP4 (H.264). The "01" is the chapter and "0001" is the clip. GoPro splits long recordings into chapters, often around 4 GB each, so the next part of the same clip is GX020001.MP4.</li>
+  <li><strong>Photos:</strong> GOPR0001.JPG. RAW photos use GoPro's .GPR format, which can come back by name if the file records survive.</li>
+  <li><strong>Extras:</strong> .LRV files are low-resolution copies of videos, and .THM files are small thumbnails.</li>
+</ul>
+
+<p><strong>Tips:</strong> recover every chapter of a clip, not just the first. If a main MP4 comes back Damaged, look for the matching .LRV file. It's a lower-quality copy, and renamed to .MP4 (in a separate folder, so it can't replace anything) it usually plays.</p>
+
+<h2 id="dji">DJI drones</h2>
+
+<ul>
+  <li><strong>Folders:</strong> DCIM/100MEDIA on many models.</li>
+  <li><strong>Names:</strong> DJI_0001.JPG and DJI_0001.MP4 on many models. Newer drones use longer names that include the date and time.</li>
+  <li><strong>RAW:</strong> DNG, which the deep scan finds.</li>
+  <li><strong>Extras:</strong> some models save a small .LRF file next to each video (a low-resolution copy) and an .SRT file with flight data.</li>
+</ul>
+
+<p><strong>Tips:</strong> drone videos are large, and long flights produce several files. On a big card that's been filled and cleared many times, a video can be stored in pieces, so some may come back Partial. If a main video is Damaged, a recovered .LRF file renamed to .MP4 in a separate folder may give you a lower-resolution copy.</p>
+
+<h2 id="insta360">Insta360</h2>
+
+<ul>
+  <li><strong>Folders:</strong> DCIM/Camera01.</li>
+  <li><strong>Names:</strong> VID_20240601_143000_00_001.insv for video and IMG_…​.insp for photos, with the date and time built in. Low-resolution .LRV copies sit alongside.</li>
+  <li><strong>Lenses:</strong> the X3 writes two video files per recording, one per lens. The X4 and later write one file with both.</li>
+</ul>
+
+<p><strong>What to expect:</strong> deleted .insv and .insp files can come back with their names when the card's file records survive, and Insta360 Studio needs those original names and extensions. The deep scan doesn't recognize Insta360's own formats, so after a format we can't promise much for 360 footage. Recover as soon as you can, before the card is used again.</p>
+
+<h2>Tips for recovering video</h2>
+
+<ul>
+  <li><strong>Recover early.</strong> Videos are big, so a few minutes of new recording can overwrite several old clips.</li>
+  <li><strong>Get every part.</strong> GoPro chapters, drone flights and long camera clips are often split across several files. Recover them all.</li>
+  <li><strong>Expect Partial files on busy cards.</strong> When a card has been filled and cleared many times, new videos get written into whatever gaps are free, in pieces. If those pieces can't all be traced, the video comes back Partial and may play up to a point, or with glitches.</li>
+  <li><strong>Use the low-resolution copies.</strong> GoPro .LRV, DJI .LRF and Sony proxy files are smaller, so they're more likely to survive intact.</li>
+  <li><strong>Check before you reuse the card.</strong> Play each recovered video all the way through on your Mac. QuickTime is strict, and VLC is often more forgiving of damaged files.</li>
+  <li><strong>Next time, format instead of deleting.</strong> Once your footage is safely copied, format the card in the camera. That gives new videos one clear run of space, so they're less likely to be split into pieces.</li>
+</ul>
+
+<section class="faq">
+  <h2>Questions</h2>
+  <details>
+    <summary>Which folder on my camera's card has the photos?</summary>
+    <p>Almost always DCIM, inside a numbered folder such as 100CANON, 100MSDCF or 100_FUJI. Sony puts video in PRIVATE/M4ROOT/CLIP instead. Recovery apps search the whole card, so you don't need to pick a folder.</p>
+  </details>
+  <details>
+    <summary>My camera has two card slots. Which card should I scan?</summary>
+    <p>Both. Depending on the camera's settings, the second card may hold a backup copy, RAW files while the first holds JPEGs, or the photos taken after the first card filled up.</p>
+  </details>
+  <details>
+    <summary>Why are my recovered GoPro videos split into several files?</summary>
+    <p>That's how GoPro records. Long videos are split into chapters, such as GX010001.MP4, GX020001.MP4 and so on. They're parts of the same clip, and most video editors can put them back together.</p>
+  </details>
+  <details>
+    <summary>Can {{APP}} find RAW files after a card has been formatted?</summary>
+    <p>Yes, if the format was a quick one. The deep scan recognizes Canon CR2 and CR3, Nikon NEF, Sony ARW, Fujifilm RAF, Adobe DNG, Olympus and OM System ORF, Panasonic RW2, Pentax PEF and Samsung SRW. See <a href="/formatted-sd-card">recovering a formatted SD card</a>.</p>
+  </details>
+  <details>
+    <summary>Why don't my recovered photos have the camera's file names?</summary>
+    <p>They were found by the deep scan, which happens when the card's file records were removed, usually by a format. Photos don't store their own file names, so {{APP}} names them by the date they were taken.</p>
+  </details>
+</section>
+
+<a class="download" href="/download">Download {{APP}} free</a>

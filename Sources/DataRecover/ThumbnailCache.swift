@@ -28,7 +28,7 @@ final class ThumbnailCache: @unchecked Sendable {
     }
 
     func image(for file: RecoverableFile) async -> NSImage? {
-        guard file.kind.hasImagePreview || Self.isPlayableVideo(file) else { return nil }
+        guard Self.hasThumbnail(file) else { return nil }
         if let hit = cached(file) { return hit }
         return await withCheckedContinuation { continuation in
             lock.lock()
@@ -71,11 +71,42 @@ final class ThumbnailCache: @unchecked Sendable {
         file.category == .video && DiskAsset.contentType(for: file) != nil && file.quality != .damaged
     }
 
+    static func hasThumbnail(_ file: RecoverableFile) -> Bool {
+        file.kind.hasImagePreview || isPlayableVideo(file) || (file.kind == .pdf && file.size <= 40 << 20 && file.quality != .damaged)
+    }
+
+    /// The first page of a PDF, drawn on white.
+    private static func pdfPage(_ file: RecoverableFile, reader: BlockReader) -> NSImage? {
+        guard let data = try? RecoveryEngine.read(file, from: reader, maxBytes: Int(file.size)),
+              let provider = CGDataProvider(data: data as CFData),
+              let document = CGPDFDocument(provider),
+              let page = document.page(at: 1)
+        else { return nil }
+        let box = page.getBoxRect(.cropBox)
+        guard box.width > 0, box.height > 0 else { return nil }
+        let scale = 420 / max(box.width, box.height)
+        let size = CGSize(width: (box.width * scale).rounded(), height: (box.height * scale).rounded())
+        guard let context = CGContext(
+            data: nil, width: Int(size.width), height: Int(size.height), bitsPerComponent: 8, bytesPerRow: 0,
+            space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ) else { return nil }
+        context.setFillColor(CGColor(gray: 1, alpha: 1))
+        context.fill(CGRect(origin: .zero, size: size))
+        context.scaleBy(x: scale, y: scale)
+        context.translateBy(x: -box.minX, y: -box.minY)
+        context.drawPDFPage(page)
+        guard let image = context.makeImage() else { return nil }
+        return NSImage(cgImage: image, size: size)
+    }
+
     /// Reads the whole picture (or its embedded preview). Partial reads draw half-grey thumbnails.
     private static func render(_ file: RecoverableFile, reader: BlockReader) -> NSImage? {
         if isPlayableVideo(file) {
             guard let asset = DiskAsset(file: file, reader: reader), let frame = asset.thumbnail(maxPixels: 420) else { return nil }
             return NSImage(cgImage: frame, size: NSSize(width: frame.width, height: frame.height))
+        }
+        if file.kind == .pdf {
+            return pdfPage(file, reader: reader)
         }
         guard let data = Previews.imageData(for: file, reader: reader),
               let source = CGImageSourceCreateWithData(data as CFData, [kCGImageSourceShouldCache: false] as CFDictionary)
