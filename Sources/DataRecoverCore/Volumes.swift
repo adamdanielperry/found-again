@@ -5,6 +5,7 @@ enum VolumeKind {
     case fat16
     case fat32
     case exfat
+    case ntfs
 }
 
 struct FoundVolume {
@@ -57,6 +58,14 @@ enum VolumeFinder {
     private static func detect(boot: Data, at offset: UInt64, diskSize: UInt64) -> FoundVolume? {
         guard boot.count >= 512, boot[510] == 0x55, boot[511] == 0xAA else { return nil }
         guard offset < diskSize else { return nil }
+        if boot.subdata(in: 3..<11) == Data("NTFS    ".utf8) {
+            // Windows-formatted drives. NTFS leaves the FAT fields zero, so it never passes the FAT checks below.
+            guard let geometry = NTFSGeometry.parse(boot: boot, at: offset) else { return nil }
+            let volumeBytes = geometry.volumeBytes
+            if volumeBytes > diskSize || offset + volumeBytes > diskSize + 1024 * 1024 { return nil }
+            guard geometry.offset(ofCluster: geometry.mftCluster) < diskSize else { return nil }
+            return FoundVolume(offset: offset, kind: .ntfs)
+        }
         if boot.subdata(in: 3..<11) == Data("EXFAT   ".utf8) {
             guard let sectors = Binary.u64le(boot, 72) else { return nil }
             let shift = Int(boot[108])

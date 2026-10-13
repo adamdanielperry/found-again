@@ -57,6 +57,16 @@ enum Binary {
         return makeDate(year: year, month: month, day: day, hour: hour, minute: minute, second: second)
     }
 
+    /// Windows FILETIME: 100-nanosecond ticks since 1 January 1601, UTC. Zero, or a date outside the years
+    /// the other file systems accept, means the field is unset or junk.
+    static func fileTimeDate(_ ticks: UInt64) -> Date? {
+        guard ticks > 0 else { return nil }
+        let seconds = Int64(ticks / 10_000_000) - 11_644_473_600
+        guard seconds >= 315_532_800, seconds < 4_102_444_800 else { return nil }
+        let fraction = Double(ticks % 10_000_000) / 10_000_000
+        return Date(timeIntervalSince1970: Double(seconds) + fraction)
+    }
+
     static func makeDate(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int) -> Date? {
         guard (1980...2100).contains(year), (1...12).contains(month), (1...31).contains(day) else { return nil }
         guard (0...23).contains(hour), (0...59).contains(minute), (0...58).contains(second) else { return nil }

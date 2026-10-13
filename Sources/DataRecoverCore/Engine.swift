@@ -30,6 +30,9 @@ public enum RecoveryEngine {
                 case .exfat:
                     names.append("ExFAT")
                     try ExFATScanner.scan(reader: reader, volume: volume, options: options, sink: &files, used: &used)
+                case .ntfs:
+                    names.append("NTFS")
+                    try NTFSScanner.scan(reader: reader, volume: volume, options: options, sink: &files, used: &used)
                 }
             } catch let error as RecoverError where error == .cancelled || error == .deviceGone {
                 throw error
