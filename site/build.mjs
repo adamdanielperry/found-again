@@ -92,7 +92,7 @@ const app = {
 };
 
 const pages = [];
-function page(slug, { title, description, body, ogType = "article", schema = [] }) {
+function page(slug, { title, description, body, ogType = "article", schema = [], listed = true }) {
   const canonical = slug ? `${origin}/${slug}` : `${origin}/`;
   const html = fill(layout, {
     ...shared,
@@ -106,7 +106,7 @@ function page(slug, { title, description, body, ogType = "article", schema = [] 
   // Cloudflare Pages serves guide.html at /guide with no redirect, matching the canonical URL.
   // (guide/index.html would redirect /guide to /guide/.)
   writeFileSync(slug ? join(out, `${slug}.html`) : join(out, "index.html"), html);
-  pages.push(canonical);
+  if (listed) pages.push(canonical);
 }
 
 rmSync(out, { recursive: true, force: true });
@@ -201,6 +201,22 @@ page("thanks", {
   </div>
 </div></article>`,
   ogType: "website",
+});
+
+// Where Stripe sends people after a tip. Not in the sitemap.
+page("tipped", {
+  title: `Thank you · ${brand.name}`,
+  description: `Thank you for your tip. It keeps ${brand.name} free for the next person.`,
+  body: `<article class="article"><div class="wrap">
+  <h1>Thank you</h1>
+  <div class="prose">
+    <p>Your tip has gone through. It pays for the time that keeps {{name}} free, with no limits, for the next person who deletes something they love.</p>
+    <p>Stripe will email your receipt. If anything looks wrong, write to <a href="mailto:hello@{{domain}}">hello@{{domain}}</a>.</p>
+    <p>If you'd like to help further, tell one friend, or <a href="{{repo}}">star the project on GitHub</a>.</p>
+  </div>
+</div></article>`,
+  ogType: "website",
+  listed: false,
 });
 
 // Privacy
