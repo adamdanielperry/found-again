@@ -38,13 +38,15 @@ function fill(text, values) {
 
 // Until the signed DMG is published, download pages say it's coming instead of linking to a missing file.
 const available = release.available === true;
+// The DMG is attached to the GitHub release, whose download count then covers the website, GitHub and Homebrew.
+const dmgUrl = `${release.repo}/releases/download/v${release.version}/${release.file}`;
 // The tip button only appears once a real payment link is set.
 const tipsOpen = /^https:\/\//.test(release.tipUrl ?? "") && !release.tipUrl.includes("REPLACE");
 
 const shared = {
   name: brand.name, APP: brand.name, DOMAIN: brand.domain, domain: brand.domain, origin, icon: brand.icon,
   heroTitle: brand.heroTitle, googleFamily: brand.fonts.googleFamily, cssVars, buildId, brewName,
-  version: release.version, dmgSize: release.size, dmgFile: release.file, year: new Date().getFullYear(),
+  version: release.version, dmgSize: release.size, dmgUrl, year: new Date().getFullYear(),
   themeColor: brand.light.paper, repo: release.repo,
   requirements: available
     ? `Version ${release.version} · macOS 14 or later<br>Apple silicon and Intel · ${release.size}`
@@ -113,17 +115,6 @@ rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 cpSync(join(root, "static"), out, { recursive: true });
 
-// The signed DMG is built into ../dist by scripts/release.sh and kept out of git; the site serves its own copy.
-if (available) {
-  const dmg = join(root, "..", "dist", release.file);
-  if (!existsSync(dmg)) {
-    console.error(`release.json says ${release.file} is available, but ${dmg} doesn't exist. Run scripts/release.sh first.`);
-    process.exit(1);
-  }
-  mkdirSync(join(out, "releases"), { recursive: true });
-  cpSync(dmg, join(out, "releases", release.file));
-}
-
 // Home
 page("", {
   title: `${brand.name} · Free photo and file recovery for Mac`,
@@ -173,7 +164,7 @@ page("guides", {
 </div></article>`,
 });
 
-// Download page: the button links straight at the signed DMG.
+// Download page: the button links straight at the signed DMG on GitHub.
 page("download", {
   title: `Download ${brand.name} for Mac`,
   description: `Download ${brand.name}, the free app for recovering deleted photos and files on Mac. Version ${release.version}, signed and notarized by Apple.`,
@@ -181,7 +172,7 @@ page("download", {
   <h1>Download {{name}}</h1>
   <div class="prose">
     ${available ? `<p>Version {{version}} · {{dmgSize}} · macOS 14 Sonoma or later · Apple silicon and Intel.</p>
-    <a class="download" href="/releases/{{dmgFile}}">Download {{name}} {{version}}</a>` : `<p><b>Coming very soon.</b> {{name}} is in its final checks, including Apple's security review, so it opens on any Mac without warnings. It'll be free to download here.</p>
+    <a class="download" href="{{dmgUrl}}">Download {{name}} {{version}}</a>` : `<p><b>Coming very soon.</b> {{name}} is in its final checks, including Apple's security review, so it opens on any Mac without warnings. It'll be free to download here.</p>
     <p>It's open source, so you can read every line of it now on <a href="{{repo}}">GitHub</a>.</p>
     <p>While you wait, the most important thing is to stop using the card or drive. Our <a href="/sd-card-recovery-mac">step-by-step guide</a> explains why, and what else you can do today.</p>`}
     <h2>Install it</h2>
@@ -239,7 +230,7 @@ page("privacy", {
   <h1>Privacy</h1>
   <div class="prose">
     <p><b>The app collects nothing.</b> {{name}} never connects to the internet. It has no analytics, no crash reporting and no account. Your files are read on your Mac and copied to a folder on your Mac, and nowhere else.</p>
-    <p><b>This website uses no cookies and no tracking scripts.</b> It's hosted on Cloudflare, which keeps standard server logs (such as IP addresses and pages requested) for security and aggregate traffic counts.</p>
+    <p><b>This website uses no cookies and no tracking scripts.</b> It's hosted on Cloudflare, which keeps standard server logs (such as IP addresses and pages requested) for security and aggregate traffic counts. The app itself downloads from GitHub, which counts downloads and keeps its own logs under <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">its privacy statement</a>.</p>
     <p><b>Tips</b> are handled by the tip platform under its own privacy policy. We receive your name and message only if you choose to give them.</p>
     <p>Questions: <a href="mailto:hello@{{domain}}">hello@{{domain}}</a>.</p>
   </div>
@@ -266,13 +257,11 @@ writeFileSync(join(out, "_headers"), `/*
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
   X-Frame-Options: DENY
-/releases/*
-  Content-Disposition: attachment
-  Cache-Control: public, max-age=31536000, immutable
 /img/*
   Cache-Control: public, max-age=604800
 `);
-writeFileSync(join(out, "_redirects"), `/help /guides 301\n/source ${release.repo} 302\n/latest ${available ? `/releases/${release.file}` : "/download"} 302\n`);
+// /releases/<file> keeps working for anyone who saved the link from when the site hosted the DMG itself.
+writeFileSync(join(out, "_redirects"), `/help /guides 301\n/source ${release.repo} 302\n/latest ${available ? dmgUrl : "/download"} 302\n/releases/* ${available ? dmgUrl : "/download"} 302\n`);
 
 const size = (dir) => readdirSync(dir).reduce((sum, f) => { const p = join(dir, f); const s = statSync(p); return sum + (s.isDirectory() ? size(p) : s.size); }, 0);
 console.log(`Built ${pages.length} pages for ${brand.name} (${brand.domain}) into ${out} — ${(size(out) / 1024).toFixed(0)} KB`);
