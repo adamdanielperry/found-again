@@ -192,7 +192,14 @@ struct FileTile: View {
     private var picture: some View {
         ZStack {
             Color(nsColor: .controlBackgroundColor)
-            if let image {
+            if let image, file.category == .document {
+                // A page cropped to fill the tile is mostly margin, so show the whole page.
+                Image(nsImage: image)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .shadow(color: .black.opacity(0.18), radius: 3, y: 1)
+                    .padding(14)
+            } else if let image {
                 Image(nsImage: image)
                     .resizable()
                     .aspectRatio(contentMode: .fill)

@@ -3,7 +3,7 @@ import DataRecoverCore
 import Foundation
 
 /// Developer commands that exercise the app's own code paths without the window.
-///   Unerase --render-thumbnails <disk image> <output folder>
+///   FoundAgain --render-thumbnails <disk image> <output folder>
 enum DevTools {
     static func runIfRequested() {
         let args = CommandLine.arguments
@@ -48,7 +48,7 @@ enum DevTools {
     }
 
     /// Draws the main window offscreen and saves it as a PNG, for screenshots that don't need screen access.
-    ///   Unerase --snapshot-window <out.png> [--image <disk image>] [--select <count>]
+    ///   FoundAgain --snapshot-window <out.png> [--image <disk image>] [--select <count>]
     @MainActor
     private static func snapshotWindow(to output: URL, image: String?, select: Int) {
         let app = NSApplication.shared

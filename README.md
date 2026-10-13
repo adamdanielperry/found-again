@@ -1,4 +1,6 @@
-# DataRecover (working name; public brand to be chosen)
+# Found Again
+
+[foundagain.app](https://foundagain.app) · The repository and Swift targets keep the original working name, DataRecover.
 
 A free Mac app that gets deleted photos, videos and files back from memory cards, USB sticks and external drives. No trial, no limits, no account, and the app never goes online. A tip request appears only after a successful recovery.
 
@@ -41,7 +43,7 @@ Requires macOS 14+ and Xcode 16+ (developed on Xcode 27 / macOS 27).
 scripts/dev/make-test-card.sh /tmp/cards exfat       # exFAT card with deleted photos, a video and a PDF
 scripts/dev/make-test-card.sh /tmp/cards formatted   # FAT32 card reformatted after shooting
 hdiutil attach /tmp/cards/card-exfat.dmg
-RECOVER_ALLOW_DISK_IMAGES=disk12 dist/Unerase.app/Contents/MacOS/Unerase   # list that image as if it were a card
+RECOVER_ALLOW_DISK_IMAGES=disk12 "dist/Found Again.app/Contents/MacOS/FoundAgain"   # list that image as if it were a card
 ```
 
 `RECOVER_DEFAULT_DESTINATION=/tmp/out` makes recoveries default to a disposable folder. `--render-thumbnails <image> <folder>` and `--snapshot-window <png> [--image <dmg>] [--select n]` check thumbnails and the window without screen access.

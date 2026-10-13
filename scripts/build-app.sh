@@ -18,9 +18,9 @@ BIN_DIR="$(swift build -c release ${ARCHS[@]+"${ARCHS[@]}"} --show-bin-path)"
 APP="dist/$APP_NAME.app"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp "$BIN_DIR/DataRecover" "$APP/Contents/MacOS/$APP_NAME"
+cp "$BIN_DIR/DataRecover" "$APP/Contents/MacOS/$EXECUTABLE"
 cp Support/Info.plist "$APP/Contents/Info.plist"
-plutil -replace CFBundleExecutable -string "$APP_NAME" "$APP/Contents/Info.plist"
+plutil -replace CFBundleExecutable -string "$EXECUTABLE" "$APP/Contents/Info.plist"
 plutil -replace CFBundleName -string "$APP_NAME" "$APP/Contents/Info.plist"
 plutil -replace CFBundleDisplayName -string "$APP_NAME" "$APP/Contents/Info.plist"
 plutil -replace CFBundleIdentifier -string "$BUNDLE_ID" "$APP/Contents/Info.plist"
@@ -36,12 +36,12 @@ if [[ -d "$ICON_SOURCE" ]]; then
     --minimum-deployment-target 14.0 --app-icon AppIcon --output-partial-info-plist "$ICON_WORK/partial.plist" >/dev/null
   rm -rf "$ICON_WORK"
 fi
-chmod 755 "$APP/Contents/MacOS/$APP_NAME"
+BINARY="$APP/Contents/MacOS/$EXECUTABLE"
+chmod 755 "$BINARY"
 
 # SwiftPM records the deployment target as the SDK version. macOS uses that field to decide whether the app
 # gets the current system design, so record the SDK the app was really built with.
 SDK_VERSION="$(xcrun --show-sdk-version)"
-BINARY="$APP/Contents/MacOS/$APP_NAME"
 for ARCH in $(lipo -archs "$BINARY"); do
   vtool -arch "$ARCH" -set-build-version macos 14.0 "$SDK_VERSION" -replace -output "$BINARY.tmp" "$BINARY"
   mv "$BINARY.tmp" "$BINARY"
@@ -57,4 +57,4 @@ elif security find-identity -v -p codesigning | grep -q "$DEV_IDENTITY"; then
 else
   codesign --force --sign - "$APP"
 fi
-echo "Built $APP ($(lipo -archs "$APP/Contents/MacOS/$APP_NAME"))"
+echo "Built $APP ($(lipo -archs "$BINARY"))"

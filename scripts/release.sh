@@ -14,7 +14,7 @@ NOTARIZE=1
 scripts/build-app.sh --release
 
 APP="dist/$APP_NAME.app"
-DMG="dist/$APP_NAME-$VERSION.dmg"
+DMG="dist/$DMG_NAME"
 STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
 

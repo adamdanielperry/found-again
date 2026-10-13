@@ -23,7 +23,7 @@ struct HomeView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background(Brand.paper)
     }
 
     private var header: some View {
@@ -165,7 +165,7 @@ struct DeviceCard: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color(nsColor: .controlBackgroundColor))
+                    .fill(Brand.card)
                     .shadow(color: .black.opacity(hovering ? 0.10 : 0.04), radius: hovering ? 12 : 4, y: hovering ? 4 : 1)
             )
             .overlay(
@@ -254,7 +254,7 @@ struct PlaceButton: View {
             .frame(maxWidth: 300)
             .background(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(hovering ? Brand.accentSoft : Color(nsColor: .controlBackgroundColor))
+                    .fill(hovering ? Brand.accentSoft : Brand.card)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)

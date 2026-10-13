@@ -189,7 +189,7 @@ struct DonationCard: View {
             ZStack {
                 Circle().fill(Brand.accentSoft).frame(width: 44, height: 44)
                 Image(systemName: "heart.fill")
-                    .foregroundStyle(Brand.accent)
+                    .foregroundStyle(Brand.marigold)
                     .font(.title3)
             }
             VStack(alignment: .leading, spacing: 6) {
