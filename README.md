@@ -1,27 +1,47 @@
-# Recover Photos
+# DataRecover (working name; public brand to be chosen)
 
-A small Mac app that copies deleted photos and videos off a camera SD card into a folder you choose. It only reads the card.
+A free Mac app that gets deleted photos, videos and files back from memory cards, USB sticks and external drives. No trial, no limits, no account, and the app never goes online. A tip request appears only after a successful recovery.
 
-Fujifilm cards (JPEG and RAF) use FAT32 or ExFAT. Deleting a photo in the camera usually leaves the file name and the picture data in place until a new photo overwrites that space.
+## What it does
 
-## Use it
+1. **File records first.** Reads FAT16, FAT32 and exFAT directories (NTFS in progress) for deleted entries, so files come back with their names, folders and dates in seconds.
+2. **Deep scan.** Reads every 512-byte sector looking for files by their contents, so reformatted cards and lost names still work. Files found this way are named by capture date and camera model.
+3. **Recover.** Copies chosen files to a folder on the Mac. Never writes to the source; refuses to save onto it.
+
+Formats found by the deep scan: JPEG, HEIC, AVIF, PNG, GIF, TIFF, WebP, BMP, PSD; RAW from Canon (CR2, CR3), Nikon, Sony, Fujifilm, Adobe DNG, Olympus/OM, Panasonic, Pentax, Samsung; MOV, MP4, M4V, 3GP, AVI, MKV/WebM; MP3, WAV, M4A, FLAC; PDF, Word/Excel/PowerPoint (old and new), Pages/Numbers/Keynote, EPUB, ZIP.
+
+Also: live results during the scan, thumbnails including video frames, in-app preview, quality flags (Partial/Damaged), bad-sector tolerance, and "Save a Copy of This Disk" for failing cards.
+
+## Build and run
 
 ```bash
-./scripts/build-app.sh
-open dist/DataRecover.app
+scripts/build-app.sh            # dist/<Name>.app for this Mac
+UNIVERSAL=1 scripts/build-app.sh  # Apple silicon + Intel
+scripts/release.sh              # signed, notarized DMG (needs the notarytool profile in scripts/app.env)
+swift build --build-tests && swift test --skip-build
 ```
 
-1. Insert the SD card. Stop taking new photos on it until recovery is done.
-2. Open Recover Photos. The card should appear in the list. A Fujifilm card is labeled with the camera model when the card still has the camera's folders.
-3. Choose the folder where recovered photos should go. Pick a folder on the Mac, not on the card.
-4. Click **Look for deleted photos**. macOS asks for your password so the card can be read. Finder hides the card during the scan, then shows it again.
-5. If macOS says it is blocking the card, click **Allow card access**. In Full Disk Access, click +, choose Recover Photos, and turn it on. Then scan again.
-6. Review the list and click **Save selected**. Photos appear while a long search is still running.
+Requires macOS 14+ and Xcode 16+ (developed on Xcode 27 / macOS 27).
 
-The camera often erases the file name and leaves the picture. When the file list has nothing, the app reads the card and looks for JPEG, RAF, and video data. A 256 GB card can take a while. Turn on **Search the whole card even when some file names are found** if you also want that search after some names were recovered.
+## Layout
 
-## What it can and can't do
+| Path | What |
+|---|---|
+| `Sources/DataRecoverCore` | Recovery engine: devices, readers, FAT/exFAT scanners, carving (`Carving/`), restore, disk imaging |
+| `Sources/DataRecover` | SwiftUI app. `Brand.swift` holds the name, domain and colours |
+| `Sources/CDiskAccess` | C helper: asks for authorization and gets a read-only descriptor from `/usr/libexec/authopen` |
+| `Sources/recover-cli` | Developer tool: `swift run recover-cli <image> [--quick] [--save <folder>]` |
+| `scripts/` | Build, release, `app.env` (name, bundle ID, signing identities), `dev/` test helpers |
+| `site/` | Website generator: `node site/build.mjs [--brand id]` → `site/dist` (Cloudflare Pages) |
+| `docs/research/` | Market and distribution research |
 
-Photos deleted in the camera are the usual case, and the file name is often still there (`DCIM/100_FUJI/DSCF0001.JPG`). The app also looks for JPEG, RAF, HEIC, and video by their contents when you run a deep scan.
+## Testing without a real card
 
-It can't bring back a photo whose space has already been reused by a newer shot. Those files show up as damaged, or they don't show up at all. Nothing the app does writes to the card.
+```bash
+scripts/dev/make-test-card.sh /tmp/cards exfat       # exFAT card with deleted photos, a video and a PDF
+scripts/dev/make-test-card.sh /tmp/cards formatted   # FAT32 card reformatted after shooting
+hdiutil attach /tmp/cards/card-exfat.dmg
+RECOVER_ALLOW_DISK_IMAGES=disk12 dist/Unerase.app/Contents/MacOS/Unerase   # list that image as if it were a card
+```
+
+`RECOVER_DEFAULT_DESTINATION=/tmp/out` makes recoveries default to a disposable folder. `--render-thumbnails <image> <folder>` and `--snapshot-window <png> [--image <dmg>] [--select n]` check thumbnails and the window without screen access.

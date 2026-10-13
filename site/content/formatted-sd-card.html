@@ -1,0 +1,107 @@
+<!--
+title: Recover Photos from a Formatted SD Card on a Mac
+description: Formatted an SD card by mistake? A normal format usually leaves the photos in place. How to tell which format you did, and how to get photos back.
+h1: How to recover photos from a formatted SD card
+keywords: recover photos from formatted SD card; formatted SD card recovery Mac; unformat SD card; accidentally formatted memory card; recover photos after in-camera format
+updated: 2026-10-13
+-->
+
+<p>If you formatted an SD card by mistake, there's a good chance you can still recover the photos from it. A normal format, in a camera or on a Mac, writes a new, empty file list and leaves the photos themselves where they were. Only a full, low-level or overwrite format wipes the card. Stop using the card now, then work out which kind of format it was.</p>
+
+<a class="download" href="/download">Download {{APP}} free</a>
+
+<h2>Quick format vs full format</h2>
+
+<p>A card keeps a list of its files, with each file's name, folder, date and location. A quick format replaces that list with an empty one. That takes a second or two, and the photo data stays on the card until new files are written over it.</p>
+
+<p>A full format (cameras also call it a low-level format, and some computer tools call it an overwrite format) goes further and erases or writes over every part of the card. It takes much longer, often minutes. After a full format there's nothing left to recover.</p>
+
+<table>
+  <thead>
+    <tr><th>How the card was formatted</th><th>What happens to the photos</th><th>Can they come back?</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Normal format in the camera</td><td>New, empty file list. Photo data usually left in place.</td><td>Usually, without original names</td></tr>
+    <tr><td>Canon with "Low level format" ticked</td><td>Canon says this erases all recordable sectors.</td><td>No</td></tr>
+    <tr><td>Sony "Full Format"</td><td>Sony says this initializes the whole card, including the data area.</td><td>No</td></tr>
+    <tr><td>Sony "Quick Format"</td><td>Sony says this initializes only the management information.</td><td>Usually, without original names</td></tr>
+    <tr><td>Disk Utility Erase on a Mac (default)</td><td>New, empty file system.</td><td>Usually, without original names</td></tr>
+    <tr><td>Disk Utility Erase with Security Options set to write over the card</td><td>Card written over.</td><td>No</td></tr>
+    <tr><td>SD Memory Card Formatter, Quick format</td><td>The SD Association says file data isn't deleted.</td><td>Usually, without original names</td></tr>
+    <tr><td>SD Memory Card Formatter, Overwrite format</td><td>Whole data area overwritten.</td><td>No</td></tr>
+    <tr><td>Windows format with Quick Format unticked</td><td>Writes zeros to the whole card.</td><td>No</td></tr>
+  </tbody>
+</table>
+
+<aside class="note">Not sure which you did? Think about how long it took. A format that finished in a few seconds was almost certainly a quick one.</aside>
+
+<h2>Formatting in the camera</h2>
+
+<p>Most cameras' standard format is a quick one. Canon's manuals say plainly that a normal format only changes the card's file management information, and that the data isn't completely erased. Sony's help guides describe Quick Format the same way.</p>
+
+<p>Some cameras also offer a deeper option:</p>
+
+<ul>
+  <li><strong>Canon</strong> has a "Low level format" checkbox on the Format card screen. With it ticked, the camera erases all recordable sectors. If you cancel part way, Canon says the normal format still completes.</li>
+  <li><strong>Sony</strong>'s newer cameras ask you to choose Full Format or Quick Format. On some older models, pressing the Delete button on the format screen starts a full format.</li>
+  <li><strong>Panasonic</strong>'s GH6 and GH7 offer a "Low Level Format" option when formatting CFexpress cards.</li>
+</ul>
+
+<p>Other makers don't document what their format does to the data. In those cases, scan the card and see. The <a href="/camera-guides">camera-by-camera guides</a> list where each brand keeps its photos and the file names to look for.</p>
+
+<h2>Formatting on a Mac with Disk Utility</h2>
+
+<p>Clicking Erase in Disk Utility writes a new, empty file system. With ExFAT or MS-DOS (FAT), the usual choices for a camera card, the old photo data stays on the card for a deep scan to find.</p>
+
+<p>Disk Utility's Erase window can also show a Security Options button for some disks. If you used it to write over the card, the photos are gone. The same applies to the SD Association's SD Memory Card Formatter if you chose Overwrite format.</p>
+
+<p>If your Mac said the card wasn't readable and you clicked Initialize, that opened Disk Utility. What matters is whether you then erased the card, and how.</p>
+
+<h2>How to recover photos from a formatted SD card</h2>
+
+<ol>
+  <li><strong>Stop using the card.</strong> Don't take new photos on it or copy anything to it. Each new file can overwrite old photos.</li>
+  <li><strong>Put the card in a card reader.</strong> Use your Mac's SD slot or a USB reader. A camera connected by cable won't show up as a disk.</li>
+  <li><strong>Open {{APP}} and click Scan.</strong> Enter your Mac's password when macOS asks. macOS opens the card read-only, and {{APP}} unmounts it while scanning so nothing is written to it.</li>
+  <li><strong>Let the deep scan run.</strong> After a format, the file records usually describe the new, empty card, so most results come from the deep scan, which reads every sector and recognizes photos, RAW files and videos by their contents. Allow 1 to 3 minutes per 10 GB with a USB 3 reader.</li>
+  <li><strong>Recover to your Mac.</strong> Select the photos and click Recover. You can start recovering before the scan finishes.</li>
+</ol>
+
+<p>Photos found this way come back without their old names or folders, because the format replaced the list that held them. {{APP}} names them by the date and time they were taken, like 2024-06-01 14.30.00.jpg, along with the camera model, so they still sort sensibly.</p>
+
+<h2>What are the odds?</h2>
+
+<ul>
+  <li><strong>Quick format, no new photos since:</strong> the best case. Most photos usually come back.</li>
+  <li><strong>Quick format, then more shooting:</strong> each new photo or video can replace old ones. Recover what's left as soon as possible.</li>
+  <li><strong>Full, low-level or overwrite format:</strong> nothing to recover.</li>
+  <li><strong>Long videos:</strong> on a well-used card a video can be stored in several pieces. Without the file list, those pieces can't always be put back in order, so some videos come back Partial.</li>
+</ul>
+
+<p>Files marked Partial may open with missing sections. Files marked Damaged had their start overwritten and probably won't open.</p>
+
+<section class="faq">
+  <h2>Questions</h2>
+  <details>
+    <summary>Can I unformat an SD card?</summary>
+    <p>There's no undo button for a format. What you can do is copy the photos off the card with a recovery app, which reads the old data that a quick format left behind. Once you have them, format the card again before using it.</p>
+  </details>
+  <details>
+    <summary>Does formatting an SD card delete photos permanently?</summary>
+    <p>A quick format doesn't. It only replaces the file list, so the photos stay on the card until new files are saved over them. A full, low-level or overwrite format does erase them.</p>
+  </details>
+  <details>
+    <summary>I formatted the card and took more photos. Is it too late?</summary>
+    <p>Not necessarily. New photos overwrite some of the old ones, but often not all. Stop shooting and scan the card as soon as you can.</p>
+  </details>
+  <details>
+    <summary>Why don't the recovered photos have their original names?</summary>
+    <p>The names were stored in the file list, and the format replaced that list. The photos themselves don't contain their file names, so {{APP}} names them by the date they were taken instead.</p>
+  </details>
+  <details>
+    <summary>How do I know if my camera did a low-level format?</summary>
+    <p>It's usually a separate option or checkbox on the format screen, and it takes noticeably longer than a normal format. If you just confirmed the standard format and it finished in a few seconds, it was a quick one.</p>
+  </details>
+</section>
+
+<a class="download" href="/download">Download {{APP}} free</a>
