@@ -18,6 +18,14 @@ DMG="dist/$DMG_NAME"
 STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
 
+# Staple the app itself first, so it opens without a network check even after it's copied out of the DMG.
+if [[ $NOTARIZE == 1 ]]; then
+  ditto -c -k --keepParent "$APP" "$STAGE/app.zip"
+  xcrun notarytool submit "$STAGE/app.zip" --keychain-profile "$NOTARY_PROFILE" --wait
+  xcrun stapler staple "$APP"
+  rm "$STAGE/app.zip"
+fi
+
 cp -R "$APP" "$STAGE/"
 ln -s /Applications "$STAGE/Applications"
 if [[ -f Support/dmg-background.png ]]; then
