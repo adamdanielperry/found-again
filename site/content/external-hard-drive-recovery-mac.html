@@ -1,0 +1,111 @@
+<!--
+title: Recover Deleted Files from an External Drive on a Mac
+description: How to recover deleted files from an external hard drive or USB stick on a Mac, including emptied Trash, and why external SSDs are harder.
+h1: How to recover deleted files from an external hard drive or USB stick on a Mac
+keywords: recover deleted files from external hard drive on Mac; USB flash drive recovery Mac; recover emptied Trash external drive; external SSD data recovery Mac
+updated: 2026-10-13
+-->
+
+<p>You can often recover deleted files from an external hard drive or USB stick on a Mac, even after emptying the Trash. Spinning hard drives and most USB sticks keep deleted data until something new is written over it. External SSDs are different. Many of them erase deleted data automatically, which makes recovery unlikely. Here's how to tell which you have and what to do.</p>
+
+<a class="download" href="/download">Download {{APP}} free</a>
+
+<h2>First, check the drive's own Trash</h2>
+
+<p>When you delete a file from an external drive in Finder, macOS moves it to a hidden folder called .Trashes on that same drive. It only appears in the Trash in your Dock while the drive is connected. That catches people out. Unplug the drive, and its deleted files seem to vanish from the Trash.</p>
+
+<ol>
+  <li>Plug the drive back in.</li>
+  <li>Click the Trash in the Dock.</li>
+  <li>If your files are there, select them, Control-click and choose Put Back.</li>
+</ol>
+
+<p>If you emptied the Trash while the drive was connected, the files were deleted from the drive itself. On a drive formatted as exFAT or FAT32, which includes most USB sticks, their file records are often still there, so recovery can bring them back with their original names.</p>
+
+<h2>Stop writing to the drive</h2>
+
+<ul>
+  <li>Don't copy, download or save anything to the drive until you've recovered what you need.</li>
+  <li>If the drive is your Time Machine disk or a backup target, pause backups to it.</li>
+  <li>Hold off on Disk Utility's First Aid. Repairs write to the drive.</li>
+  <li>If a hard drive is clicking, grinding or keeps disconnecting, stop using it. A drive that's failing mechanically can get worse with every hour it runs, and that's a job for a professional recovery service.</li>
+</ul>
+
+<h2>Hard drive, USB stick or SSD? Why it matters</h2>
+
+<p>Solid-state drives support a command called TRIM. When files are deleted, the computer tells the SSD which blocks are no longer needed, and the SSD erases them in the background. Once that happens, the data is gone. Hard drives don't do this, so their deleted data stays until it's overwritten.</p>
+
+<table>
+  <thead>
+    <tr><th>Drive</th><th>Format</th><th>Odds</th><th>Why</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Spinning hard drive (HDD)</td><td>Any</td><td>Good</td><td>No TRIM. Deleted data stays until it's overwritten.</td></tr>
+    <tr><td>USB flash drive or memory card</td><td>exFAT or FAT32</td><td>Good</td><td>macOS doesn't TRIM exFAT or FAT32.</td></tr>
+    <tr><td>External SSD</td><td>exFAT or FAT32</td><td>Worth a scan</td><td>macOS doesn't TRIM exFAT or FAT32. Another computer might have.</td></tr>
+    <tr><td>External SSD by Thunderbolt or USB4</td><td>APFS or Mac OS Extended</td><td>Poor</td><td>macOS usually trims these, so freed space is erased.</td></tr>
+    <tr><td>External SSD by USB</td><td>APFS or Mac OS Extended</td><td>Uncertain</td><td>Depends on the drive and its enclosure.</td></tr>
+    <tr><td>Encrypted drive</td><td>APFS (Encrypted), BitLocker and similar</td><td>Can't be scanned</td><td>The raw data is scrambled without the key.</td></tr>
+  </tbody>
+</table>
+
+<p>To see how a drive is formatted, select it in Finder and choose File › Get Info, or open Disk Utility. To check TRIM on a Thunderbolt or USB4 SSD, hold the Option key, choose Apple menu › System Information, and look under NVMExpress for "TRIM Support".</p>
+
+<h2>exFAT and FAT32 vs NTFS, APFS and Mac OS Extended</h2>
+
+<p>{{APP}} recovers files in two passes. The first reads the file records of exFAT and FAT32 drives. Deleted files found this way usually come back with their original names, folders and dates, and this pass works for any type of file.</p>
+
+<p>The second pass, the deep scan, reads every sector of the drive and recognizes files by their contents. It works on any external drive whatever its format, including NTFS drives from Windows PCs and Mac drives formatted as APFS or Mac OS Extended. Files found this way come back without their original names. Photos are named by the date they were taken.</p>
+
+<p>The deep scan recognizes:</p>
+
+<ul>
+  <li><strong>Photos:</strong> JPEG, HEIC, PNG, GIF, TIFF, WebP, BMP and PSD, plus RAW from Canon, Nikon, Sony, Fujifilm, Olympus/OM System, Panasonic, Pentax and Samsung, and DNG.</li>
+  <li><strong>Video:</strong> MOV, MP4, M4V, 3GP, AVI, MKV and WebM.</li>
+  <li><strong>Audio:</strong> MP3, WAV, M4A and FLAC.</li>
+  <li><strong>Documents:</strong> PDF, Word, Excel and PowerPoint (old and new formats), Pages, Numbers, Keynote and EPUB, plus ZIP archives.</li>
+</ul>
+
+<p>So for a USB stick full of documents, exFAT or FAT32 is the best case. For an APFS or NTFS drive, expect the files the deep scan recognizes, without their names.</p>
+
+<h2>How to recover deleted files from an external drive with {{APP}}</h2>
+
+<ol>
+  <li><strong>Connect the drive</strong> directly to your Mac if you can, rather than through a hub.</li>
+  <li><strong>Open {{APP}}.</strong> The drive appears in the list. {{APP}} lists external drives, USB sticks and memory cards. It won't scan your Mac's internal drive (<a href="/recover-deleted-files-mac-ssd">here's why, and where to look instead</a>).</li>
+  <li><strong>Click Scan</strong> and enter your Mac's password. macOS opens the drive read-only. {{APP}} unmounts it while scanning, so it disappears from Finder until the scan ends.</li>
+  <li><strong>Browse the results as they arrive.</strong> Files from the first pass appear quickly. The deep scan keeps adding more. Filter by Photos, RAW, Videos, Audio or Documents.</li>
+  <li><strong>Recover to a different disk.</strong> Choose a folder on your Mac or another drive. {{APP}} won't save recovered files onto the drive you're recovering from.</li>
+</ol>
+
+<p>Big drives take time. The deep scan reads the whole drive, at very roughly 1 to 3 minutes per 10 GB over USB 3, so a 1 TB drive can take several hours. You can recover files as soon as they appear.</p>
+
+<p>If the drive has bad sectors, {{APP}} keeps going. It fills the unreadable parts of a file with blanks and lists those files in a note saved with your recovered files.</p>
+
+<aside class="note">On drives used with a Mac, you may find small files whose names start with "._", such as ._Report.pdf. macOS creates these on exFAT and FAT32 drives to store extra information about the files next to them. They aren't your documents and can be ignored.</aside>
+
+<section class="faq">
+  <h2>Questions</h2>
+  <details>
+    <summary>Can I recover files after emptying the Trash on an external drive?</summary>
+    <p>Often, yes. Emptying the Trash deletes the files from the drive's hidden .Trashes folder, but on a hard drive or USB stick the data stays until it's overwritten. On exFAT and FAT32 drives the files often come back with their names.</p>
+  </details>
+  <details>
+    <summary>Why can't anything be recovered from my external SSD?</summary>
+    <p>If it's formatted as APFS or Mac OS Extended and connected by Thunderbolt or USB4, macOS most likely trimmed it. The SSD then erased the deleted files' space, and no software can bring that back.</p>
+  </details>
+  <details>
+    <summary>Can {{APP}} recover files from an NTFS drive used with Windows?</summary>
+    <p>Yes, through the deep scan, which finds the photo, video, audio and document types listed above by their contents. It doesn't read NTFS file records, so files come back without their original names.</p>
+  </details>
+  <details>
+    <summary>Is it safe to scan a drive with bad sectors?</summary>
+    <p>{{APP}} only reads the drive and skips past sectors it can't read. If the drive is making unusual noises or keeps disconnecting, though, stop and contact a recovery service, since running a failing drive can make it worse.</p>
+  </details>
+  <details>
+    <summary>Do I need to format the drive before scanning?</summary>
+    <p>No, and please don't. Formatting makes recovery harder. Scan the drive as it is, recover your files to another disk, and only then format it if you want to.</p>
+  </details>
+</section>
+
+<a class="download" href="/download">Download {{APP}} free</a>

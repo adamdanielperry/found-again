@@ -35,6 +35,15 @@ if [[ -f Support/AppIcon.icns ]]; then
 fi
 chmod 755 "$APP/Contents/MacOS/$APP_NAME"
 
+# SwiftPM records the deployment target as the SDK version. macOS uses that field to decide whether the app
+# gets the current system design, so record the SDK the app was really built with.
+SDK_VERSION="$(xcrun --show-sdk-version)"
+BINARY="$APP/Contents/MacOS/$APP_NAME"
+for ARCH in $(lipo -archs "$BINARY"); do
+  vtool -arch "$ARCH" -set-build-version macos 14.0 "$SDK_VERSION" -replace -output "$BINARY.tmp" "$BINARY"
+  mv "$BINARY.tmp" "$BINARY"
+done
+
 if [[ "$MODE" == "--release" ]]; then
   codesign --force --options runtime --timestamp \
     --entitlements Support/App.entitlements \

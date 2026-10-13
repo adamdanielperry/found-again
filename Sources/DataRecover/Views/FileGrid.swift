@@ -95,7 +95,7 @@ private struct SectionHeader: View {
         .padding(.vertical, 10)
         .padding(.horizontal, 4)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(nsColor: .windowBackgroundColor).opacity(0.94))
+        .background(.regularMaterial)
     }
 
     private var allSelected: Bool {
