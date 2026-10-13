@@ -1,7 +1,8 @@
 import Darwin
 import Foundation
 
-public protocol BlockReader: AnyObject {
+/// Implementations must be safe to read from several threads at once: the scan, thumbnails and saving share one.
+public protocol BlockReader: AnyObject, Sendable {
     var size: UInt64 { get }
     func read(at offset: UInt64, count: Int) throws -> Data
 }
@@ -39,7 +40,7 @@ public extension BlockReader {
     }
 }
 
-public final class DataBlockReader: BlockReader {
+public final class DataBlockReader: BlockReader, @unchecked Sendable {
     private let data: Data
     public let size: UInt64
 
@@ -58,7 +59,7 @@ public final class DataBlockReader: BlockReader {
 
 /// Reads a disk image or a raw device. Device reads stay sector-aligned, which macOS requires for /dev/rdisk.
 /// `pread` keeps no shared file position, so one reader can serve the scan and thumbnail loading at the same time.
-public final class FileBlockReader: BlockReader {
+public final class FileBlockReader: BlockReader, @unchecked Sendable {
     private let fd: Int32
     private let ownsDescriptor: Bool
     public let size: UInt64

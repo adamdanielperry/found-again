@@ -9,8 +9,8 @@ public enum PhotoRestore {
         progress: ((Double?, String) -> Void)? = nil,
         isCancelled: (() -> Bool)? = nil
     ) throws -> RestoreReport {
-        let root = directory.resolvingSymlinksInPath().standardizedFileURL
-        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let root = URL(fileURLWithPath: realPath(directory.path), isDirectory: true)
         var saved: [RestoredFile] = []
         var failed: [String] = []
         var used = Set<String>()
@@ -53,8 +53,8 @@ public enum PhotoRestore {
         for part in candidate.split(separator: "/") {
             url.appendPathComponent(String(part))
         }
-        try assertInside(url, root: root)
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try assertInside(url, root: root)
         return url
     }
 
@@ -69,14 +69,21 @@ public enum PhotoRestore {
         return dirs.joined(separator: "/") + "/" + named
     }
 
+    /// The folder chain is created before this runs, so `realpath` sees real directories.
+    /// (Foundation's symlink resolution gives different answers for /private/tmp before and after a folder exists.)
     private static func assertInside(_ url: URL, root: URL) throws {
-        let resolvedRoot = root.resolvingSymlinksInPath().standardizedFileURL
-        let parent = url.deletingLastPathComponent().resolvingSymlinksInPath().standardizedFileURL
-        let rootPath = resolvedRoot.path.hasSuffix("/") ? resolvedRoot.path : resolvedRoot.path + "/"
-        let parentPath = parent.path.hasSuffix("/") ? parent.path : parent.path + "/"
-        guard parentPath.hasPrefix(rootPath) || parent.path == resolvedRoot.path else {
+        let rootPath = realPath(root.path)
+        let parentPath = realPath(url.deletingLastPathComponent().path)
+        let prefix = rootPath.hasSuffix("/") ? rootPath : rootPath + "/"
+        guard parentPath == rootPath || (parentPath + "/").hasPrefix(prefix) else {
             throw RecoverError.message("Refusing to save outside the folder you chose.")
         }
+    }
+
+    private static func realPath(_ path: String) -> String {
+        guard let resolved = realpath(path, nil) else { return (path as NSString).standardizingPath }
+        defer { free(resolved) }
+        return String(cString: resolved)
     }
 
     private static func write(_ file: RecoverableFile, from reader: BlockReader, to url: URL) throws -> (bytes: UInt64, unreadable: UInt64) {

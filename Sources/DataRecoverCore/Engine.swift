@@ -124,7 +124,7 @@ enum FileBuilder {
         let category = FileTyping.category(name: trimmed, kind: kind)
         guard options.wants(category) else { return nil }
         let path = directory.isEmpty ? trimmed : directory + "/" + trimmed
-        let valid: Bool? = (header.isEmpty || kind == .other) ? nil : FileTyping.headerMatches(kind, header: header)
+        let valid: Bool? = header.isEmpty ? nil : FileTyping.headerMatches(kind, header: header)
         return RecoverableFile(
             id: id,
             name: trimmed,

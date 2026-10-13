@@ -212,7 +212,8 @@ public struct ScanProgress: Sendable {
     }
 }
 
-public struct ScanOptions {
+/// The callbacks are called from the scanning thread.
+public struct ScanOptions: @unchecked Sendable {
     /// Read the whole source looking for files by their contents, even when file records were found.
     public var deepScan: Bool
     /// Categories to report. Empty means everything.
@@ -315,13 +316,17 @@ public enum FileTyping {
         return category(forExtension: extensionOf(name)) ?? .other
     }
 
-    /// False when the bytes clearly aren't this kind of file. Unknown kinds always pass.
-    static func headerMatches(_ kind: FileKind, header: Data) -> Bool {
-        guard let seen = Signatures.kind(of: header) else {
-            return Signatures.unrecognizable.contains(kind)
+    /// False when the bytes clearly aren't this kind of file. Nil when this kind can't be checked.
+    static func headerMatches(_ kind: FileKind, header: Data) -> Bool? {
+        if let seen = Signatures.kind(of: header) {
+            return Signatures.compatible(seen, kind)
         }
-        return Signatures.compatible(seen, kind)
+        return verifiable.contains(kind) ? false : nil
     }
+
+    /// Kinds the carvers can recognize from their first bytes. A named file of one of these kinds
+    /// whose first bytes match nothing has been overwritten. Keep in step with `Registry.all`.
+    static let verifiable: Set<FileKind> = [.jpeg, .raf, .mov, .mp4, .m4v, .threegp, .m4a, .heic, .avif, .cr3]
 
     /// Names that are never worth showing: macOS and Windows housekeeping files.
     static func skipFile(_ name: String) -> Bool {
@@ -339,7 +344,7 @@ public enum FileTyping {
             || lower == "system volume information" || lower == ".documentrevisions-v100"
     }
 
-    static func extensionOf(_ name: String) -> String {
+    public static func extensionOf(_ name: String) -> String {
         (name as NSString).pathExtension.lowercased()
     }
 

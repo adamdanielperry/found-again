@@ -5,23 +5,25 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>en</string>
     <key>CFBundleExecutable</key>
-    <string>DataRecover</string>
+    <string>APP_NAME</string>
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
+    <key>CFBundleIconName</key>
+    <string>AppIcon</string>
     <key>CFBundleIdentifier</key>
-    <string>com.adamperry.DataRecover</string>
+    <string>BUNDLE_ID</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>Recover Photos</string>
+    <string>APP_NAME</string>
     <key>CFBundleDisplayName</key>
-    <string>Recover Photos</string>
+    <string>APP_NAME</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
+    <string>VERSION</string>
     <key>CFBundleVersion</key>
-    <string>1</string>
+    <string>BUILD</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
     <key>LSApplicationCategoryType</key>
@@ -30,5 +32,9 @@
     <true/>
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>
+    <key>NSHumanReadableCopyright</key>
+    <string>© 2026 weio Ltd. Free to use.</string>
+    <key>NSRemovableVolumesUsageDescription</key>
+    <string>Reading the memory card or drive lets the app find deleted files on it. Nothing on it is changed.</string>
 </dict>
 </plist>

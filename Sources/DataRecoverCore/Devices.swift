@@ -87,9 +87,10 @@ public struct Device: Identifiable, Equatable, Sendable {
 }
 
 public enum DeviceCatalog {
-    /// Set RECOVER_ALLOW_DISK_IMAGES=1 to list attached disk images, which is handy for testing.
-    public static var allowDiskImages: Bool {
-        ProcessInfo.processInfo.environment["RECOVER_ALLOW_DISK_IMAGES"] == "1"
+    /// Attached disk images to list as if they were cards, for testing: RECOVER_ALLOW_DISK_IMAGES=disk12,disk13
+    static var allowedDiskImages: Set<String> {
+        let value = ProcessInfo.processInfo.environment["RECOVER_ALLOW_DISK_IMAGES"] ?? ""
+        return Set(value.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) })
     }
 
     public static func devices() throws -> [Device] {
@@ -111,7 +112,7 @@ public enum DeviceCatalog {
                 internalDisk: bool(info["Internal"]) ?? false,
                 startup: startup.contains(disk)
             )
-            guard DeviceGuard.isRecoverable(facts, allowDiskImages: allowDiskImages) else { continue }
+            guard DeviceGuard.isRecoverable(facts, allowDiskImages: allowedDiskImages.contains(disk)) else { continue }
             let layout = layouts.first { ($0["DeviceIdentifier"] as? String) == disk }
             found.append(device(id: disk, info: info, layout: layout))
         }
@@ -130,8 +131,8 @@ public enum DeviceCatalog {
 
     /// Unmounts every volume so macOS stops writing to the disk while it's read. Returns true when something was unmounted.
     public static func unmount(_ device: Device) throws -> Bool {
-        let current = (try? Self.device(identifier: device.id)) ?? device
-        guard current.isMounted else { return false }
+        let mounted = device.mountPoints.contains { FileManager.default.fileExists(atPath: $0) }
+        guard mounted else { return false }
         if run(["unmountDisk", device.id]) || run(["unmountDisk", "force", device.id]) {
             return true
         }

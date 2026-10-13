@@ -29,6 +29,11 @@ let package = Package(
                 .linkedFramework("QuickLookUI"),
             ]
         ),
+        .executableTarget(
+            name: "recover-cli",
+            dependencies: ["DataRecoverCore"],
+            swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
         .testTarget(
             name: "DataRecoverCoreTests",
             dependencies: ["DataRecoverCore"],
