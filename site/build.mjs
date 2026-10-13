@@ -36,11 +36,19 @@ function fill(text, values) {
   return text.replace(/\{\{(\w+)\}\}/g, (match, key) => (key in values ? values[key] : match));
 }
 
+// Until the signed DMG is published, download pages say it's coming instead of linking to a missing file.
+const available = release.available === true;
+// The tip button only appears once a real payment link is set.
+const tipsOpen = /^https:\/\//.test(release.tipUrl ?? "") && !release.tipUrl.includes("REPLACE");
+
 const shared = {
   name: brand.name, APP: brand.name, DOMAIN: brand.domain, domain: brand.domain, origin, icon: brand.icon,
   heroTitle: brand.heroTitle, googleFamily: brand.fonts.googleFamily, cssVars, buildId, brewName,
   version: release.version, dmgSize: release.size, dmgFile: release.file, year: new Date().getFullYear(),
-  themeColor: brand.light.paper,
+  themeColor: brand.light.paper, repo: release.repo,
+  requirements: available
+    ? `Version ${release.version} · macOS 14 or later<br>Apple silicon and Intel · ${release.size}`
+    : `Coming very soon · macOS 14 or later<br>Apple silicon and Intel`,
 };
 
 /** Reads the <!-- key: value --> block at the top of a content fragment. */
@@ -95,9 +103,9 @@ function page(slug, { title, description, body, ogType = "article", schema = [] 
     content: fill(body, shared),
     schema: JSON.stringify({ "@context": "https://schema.org", "@graph": schema.filter(Boolean) }).replace(/</g, "\\u003c"),
   });
-  const dir = slug ? join(out, slug) : out;
-  mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, "index.html"), html);
+  // Cloudflare Pages serves guide.html at /guide with no redirect, matching the canonical URL.
+  // (guide/index.html would redirect /guide to /guide/.)
+  writeFileSync(slug ? join(out, `${slug}.html`) : join(out, "index.html"), html);
   pages.push(canonical);
 }
 
@@ -160,8 +168,10 @@ page("download", {
   body: `<article class="article"><div class="wrap">
   <h1>Download {{name}}</h1>
   <div class="prose">
-    <p>Version {{version}} · {{dmgSize}} · macOS 14 Sonoma or later · Apple silicon and Intel.</p>
-    <a class="download" href="/releases/{{dmgFile}}">Download {{name}} {{version}}</a>
+    ${available ? `<p>Version {{version}} · {{dmgSize}} · macOS 14 Sonoma or later · Apple silicon and Intel.</p>
+    <a class="download" href="/releases/{{dmgFile}}">Download {{name}} {{version}}</a>` : `<p><b>Coming very soon.</b> {{name}} is in its final checks, including Apple's security review, so it opens on any Mac without warnings. It'll be free to download here.</p>
+    <p>It's open source, so you can read every line of it now on <a href="{{repo}}">GitHub</a>.</p>
+    <p>While you wait, the most important thing is to stop using the card or drive. Our <a href="/sd-card-recovery-mac">step-by-step guide</a> explains why, and what else you can do today.</p>`}
     <h2>Install it</h2>
     <ol>
       <li>Open the downloaded file.</li>
@@ -185,7 +195,7 @@ page("thanks", {
   <h1>Glad it helped</h1>
   <div class="prose">
     <p>{{name}} is free, and it'll stay free. There's no paid version and nothing to unlock. If it got your photos or files back, a tip of whatever feels right keeps it going for the next person.</p>
-    <a class="download" href="${release.tipUrl}">Leave a tip</a>
+    ${tipsOpen ? `<a class="download" href="${release.tipUrl}">Leave a tip</a>` : `<p><b>Tips open very soon.</b> Thank you for wanting to.</p>`}
     <p class="muted">Tips go to weio Ltd, the small UK company that makes {{name}}. Payment is handled by the tip platform; we never see your card details.</p>
     <p>Can't tip? Telling one friend about {{name}} helps just as much.</p>
   </div>
@@ -234,7 +244,7 @@ writeFileSync(join(out, "_headers"), `/*
 /img/*
   Cache-Control: public, max-age=604800
 `);
-writeFileSync(join(out, "_redirects"), `/help /guides 301\n/latest /releases/${release.file} 302\n`);
+writeFileSync(join(out, "_redirects"), `/help /guides 301\n/source ${release.repo} 302\n/latest ${available ? `/releases/${release.file}` : "/download"} 302\n`);
 
 const size = (dir) => readdirSync(dir).reduce((sum, f) => { const p = join(dir, f); const s = statSync(p); return sum + (s.isDirectory() ? size(p) : s.size); }, 0);
 console.log(`Built ${pages.length} pages for ${brand.name} (${brand.domain}) into ${out} — ${(size(out) / 1024).toFixed(0)} KB`);
