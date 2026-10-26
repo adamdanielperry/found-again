@@ -210,6 +210,12 @@ struct DonationCard: View {
                     }
                 }
                 .padding(.top, 4)
+                Button("Tell us what you got back") {
+                    openURL(Brand.story)
+                }
+                .buttonStyle(.link)
+                .font(.callout)
+                .padding(.top, 2)
             }
         }
         .padding(16)

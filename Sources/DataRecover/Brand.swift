@@ -8,6 +8,7 @@ enum Brand {
     static let tagline = "Lost photos, found again. Free."
     static let website = URL(string: "https://\(domain)")!
     static let donate = URL(string: "https://\(domain)/thanks")!
+    static let story = URL(string: "https://\(domain)/story?from=app")!
     static let help = URL(string: "https://\(domain)/help")!
     static let support = URL(string: "mailto:hello@\(domain)")!
     static var updates: URL {

@@ -43,11 +43,22 @@ const dmgUrl = `${release.repo}/releases/download/v${release.version}/${release.
 // The tip button only appears once a real payment link is set.
 const tipsOpen = /^https:\/\//.test(release.tipUrl ?? "") && !release.tipUrl.includes("REPLACE");
 
+// Stories readers sent through /story and agreed to share, pasted in by hand. The home page
+// shows them once there are any.
+const stories = JSON.parse(readFileSync(join(root, "stories.json"), "utf8"));
+const storiesSection = stories.length ? `<section class="block stories" id="stories">
+  <div class="wrap">
+    <header><h2>Found again</h2></header>
+    <div class="story-list">${stories.map((s) => `<figure><blockquote>${escapeHTML(s.story)}</blockquote>${s.name ? `<figcaption>${escapeHTML(s.name)}</figcaption>` : ""}</figure>`).join("")}</div>
+    <p style="margin-top:22px"><a href="/story">Share your story</a></p>
+  </div>
+</section>` : "";
+
 const shared = {
   name: brand.name, APP: brand.name, DOMAIN: brand.domain, domain: brand.domain, origin, icon: brand.icon,
   heroTitle: brand.heroTitle, googleFamily: brand.fonts.googleFamily, cssVars, buildId, brewName,
   version: release.version, dmgSize: release.size, dmgUrl, year: new Date().getFullYear(),
-  themeColor: brand.light.paper, repo: release.repo,
+  themeColor: brand.light.paper, repo: release.repo, stories: storiesSection,
   requirements: available
     ? `Version ${release.version} · macOS 14 or later<br>Apple silicon and Intel · ${release.size}`
     : `Coming very soon · macOS 14 or later<br>Apple silicon and Intel`,
@@ -206,6 +217,21 @@ page("thanks", {
   ogType: "website",
 });
 
+/** The story form, posted to functions/api/story.js. `from` says where the reader came from. */
+const storyForm = (from) => `<form class="story-form" method="post" action="/api/story">
+      <input type="hidden" name="from" value="${from}">
+      <label class="field"><span>Your story</span>
+        <textarea name="story" rows="6" maxlength="5000" required placeholder="The photos from our wedding, a year of my daughter's drawings, the only copy of…"></textarea></label>
+      <label class="field"><span>Your name <i>optional, first name is fine</i></span>
+        <input type="text" name="name" maxlength="100" autocomplete="given-name"></label>
+      <label class="field"><span>Your email <i>optional, only if you'd like a reply</i></span>
+        <input type="email" name="email" maxlength="200" autocomplete="email"></label>
+      <label class="check"><input type="checkbox" name="share" value="yes"> I'm happy for this to be shared on {{domain}}</label>
+      <label class="trap" aria-hidden="true">Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+      <button class="download" type="submit">Send my story</button>
+      <p class="muted">It comes straight to us by email. We only put it on the website if you tick the box, and then only with the name you gave.</p>
+    </form>`;
+
 // Where Stripe sends people after a tip. Not in the sitemap.
 page("tipped", {
   title: `Thank you · ${brand.name}`,
@@ -215,7 +241,48 @@ page("tipped", {
   <div class="prose">
     <p>Your tip has gone through. It pays for the time that keeps {{name}} free, with no limits, for the next person who deletes something they love.</p>
     <p>Stripe will email your receipt. If anything looks wrong, write to <a href="mailto:hello@{{domain}}">hello@{{domain}}</a>.</p>
-    <p>If you'd like to help further, tell one friend, or <a href="{{repo}}">star the project on GitHub</a>.</p>
+    <h2>What did you get back?</h2>
+    <p>If you have a minute, we'd love to hear. Stories like yours help the next person trust that it's worth a try.</p>
+    ${storyForm("tipped")}
+  </div>
+</div></article>`,
+  ogType: "website",
+  listed: false,
+});
+
+// Story form for everyone else; the app's success screen links here with ?from=app.
+page("story", {
+  title: `Share your story · ${brand.name}`,
+  description: `Did ${brand.name} get your photos or files back? Tell us what you recovered.`,
+  body: `<article class="article"><div class="wrap">
+  <h1>What did you get back?</h1>
+  <div class="prose">
+    <p>We'd love to hear what {{name}} found for you. Every story helps the next person who's just lost something trust that it's worth a try.</p>
+    <p class="form-error" hidden></p>
+    ${storyForm("site")}
+  </div>
+</div></article>
+<script>
+  // The app links with ?from=app; failed sends come back with ?error=…
+  const query = new URLSearchParams(location.search);
+  const from = query.get("from");
+  if (from === "app" || from === "tipped") document.querySelector('.story-form [name="from"]').value = from;
+  const messages = { empty: "Please write a few words about what you got back.", send: "Sorry, that didn't send. Please try again in a minute, or email hello@{{domain}}.", form: "Sorry, that didn't send. Please try again." };
+  const error = document.querySelector(".form-error");
+  if (messages[query.get("error")]) { error.textContent = messages[query.get("error")]; error.hidden = false; }
+</script>`,
+  ogType: "website",
+});
+
+page("story-sent", {
+  title: `Thank you · ${brand.name}`,
+  description: `Thanks for sharing your story with ${brand.name}.`,
+  body: `<article class="article"><div class="wrap">
+  <h1>Thank you for sharing</h1>
+  <div class="prose">
+    <p>Your story is on its way to us, and we read every one.</p>
+    <p>If you'd like to help further, tell one friend who's lost photos, or <a href="{{repo}}">star the project on GitHub</a>.</p>
+    <p><a href="/">Back to {{name}}</a></p>
   </div>
 </div></article>`,
   ogType: "website",
@@ -232,6 +299,7 @@ page("privacy", {
     <p><b>The app collects nothing.</b> {{name}} never connects to the internet. It has no analytics, no crash reporting and no account. Your files are read on your Mac and copied to a folder on your Mac, and nowhere else.</p>
     <p><b>This website uses no cookies and no tracking scripts.</b> It's hosted on Cloudflare, which keeps standard server logs (such as IP addresses and pages requested) for security and aggregate traffic counts. The app itself downloads from GitHub, which counts downloads and keeps its own logs under <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">its privacy statement</a>.</p>
     <p><b>Tips</b> are handled by the tip platform under its own privacy policy. We receive your name and message only if you choose to give them.</p>
+    <p><b>Stories</b> you send through the <a href="/story">story form</a> come to us by email: what you write, plus a name and email address if you give them. We use them to read and reply, and put a story on this website only if you tick the box to say we can, with just the name you gave. To have one removed, email us.</p>
     <p>Questions: <a href="mailto:hello@{{domain}}">hello@{{domain}}</a>.</p>
   </div>
 </div></article>`,

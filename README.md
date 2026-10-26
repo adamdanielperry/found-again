@@ -40,7 +40,9 @@ Requires macOS 14+ and Xcode 16+ (developed on Xcode 27 / macOS 27).
 | `Sources/CDiskAccess` | C helper: asks for authorization and gets a read-only descriptor from `/usr/libexec/authopen` |
 | `Sources/recover-cli` | Developer tool: `swift run recover-cli <image> [--quick] [--save <folder>]` |
 | `scripts/` | Build, release, `app.env` (name, bundle ID, signing identities), `dev/` test helpers |
-| `site/` | Website generator: `node site/build.mjs [--brand id]` → `site/dist` (Cloudflare Pages) |
+| `site/` | Website generator: `node site/build.mjs [--brand id]` → `site/dist` (Cloudflare Pages). Deploy from `site/` so `functions/` goes too: `cd site && npx wrangler pages deploy dist --project-name found-again` |
+| `site/functions/api/story.js` | Emails `/story` submissions to info@weio.co.uk via sendemail.weio.co.uk. Needs the `SEND_EMAIL_AUTH` Pages secret |
+| `site/stories.json` | Approved stories (`{"story", "name"}`) shown on the home page; add only ones the sender agreed to share |
 | `docs/research/` | Market and distribution research |
 
 ## Testing without a real card
